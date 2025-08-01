@@ -9,7 +9,10 @@ export class AuthModal {
 
 	readonly emailInput: Locator;
 	readonly passwordInput: Locator;
-	readonly submitButton: Locator;
+        readonly submitButton: Locator;
+
+        readonly phoneInput: Locator;
+        readonly closeButton: Locator;
 
 	readonly ageCheckbox: Locator;
 	readonly termsCheckbox: Locator;
@@ -23,15 +26,18 @@ export class AuthModal {
 		this.loginTab = page.locator('div[role="dialog"] >> text=Войти');
 		this.registerTab = page.locator('div[role="dialog"] >> text=Регистрация');
 
-		this.emailInput = page.getByPlaceholder('Введите вашу электронную почту');
-		this.passwordInput = page.getByPlaceholder('Введите пароль');
+                this.emailInput = page.getByPlaceholder('Введите вашу электронную почту');
+                this.passwordInput = page.getByPlaceholder('Введите пароль');
 
-		this.submitButton = page.getByRole('button', { name: 'Продолжить' });
+                this.submitButton = page.getByRole('button', { name: 'Продолжить' });
 
-		this.ageCheckbox = page.locator('input[name="isLegalAge"]');
-		this.termsCheckbox = page.locator('input[name="isTerms"]');
-		this.newsCheckbox = page.locator('input[name="isNews"]');
-	}
+                this.ageCheckbox = page.locator('input[name="isLegalAge"]');
+                this.termsCheckbox = page.locator('input[name="isTerms"]');
+                this.newsCheckbox = page.locator('input[name="isNews"]');
+
+                this.phoneInput = page.locator('input[name="phone"]');
+                this.closeButton = this.dialog.locator('img[src*="close-dialog"]');
+        }
 
 	async waitForVisible() {
 		await expect(this.dialog).toBeVisible();
@@ -41,9 +47,22 @@ export class AuthModal {
 		await this.registerTab.click();
 	}
 
-	async switchToLogin() {
-		await this.loginTab.click();
-	}
+        async switchToLogin() {
+                await this.loginTab.click();
+        }
+
+        async switchToPhone() {
+                await this.page.getByRole('button', { name: 'Телефон' }).click();
+        }
+
+        async isEmailRegistrationSelected(): Promise<boolean> {
+                return this.emailInput.isVisible();
+        }
+
+        async close() {
+                await this.closeButton.click();
+                await expect(this.dialog).toBeHidden();
+        }
 
 	async login(email: string, password: string) {
 		await this.waitForVisible();
@@ -56,9 +75,9 @@ export class AuthModal {
 		await this.submitButton.click();
 	}
 
-	async register(email: string, password: string) {
-		await this.waitForVisible();
-		await this.switchToRegister();
+        async register(email: string, password: string) {
+                await this.waitForVisible();
+                await this.switchToRegister();
 
 		await this.emailInput.fill(email);
 		await this.passwordInput.fill(password);
@@ -69,9 +88,36 @@ export class AuthModal {
 		// Чекбокс: Я принимаю Условия и Положения
 		await this.page.locator('label', { hasText: 'Я принимаю Условия и Положения' }).locator('span').first().click();
 
-		await expect(this.submitButton).toBeEnabled();
-		await this.submitButton.click();
-	}
+                await expect(this.submitButton).toBeEnabled();
+                await this.submitButton.click();
+        }
+
+        async registerByPhone(phone: string, password: string) {
+                await this.waitForVisible();
+                await this.switchToRegister();
+                await this.switchToPhone();
+
+                await this.phoneInput.fill(phone);
+                await this.passwordInput.fill(password);
+
+                await this.page.locator('label', { hasText: 'Мне есть 18 лет' }).locator('span').first().click();
+                await this.page.locator('label', { hasText: 'Я принимаю Условия и Положения' }).locator('span').first().click();
+
+                await expect(this.submitButton).toBeEnabled();
+                await this.submitButton.click();
+        }
+
+        get emailError() {
+                return this.emailInput.locator('xpath=..').locator('.error');
+        }
+
+        get passwordError() {
+                return this.passwordInput.locator('xpath=..').locator('.error');
+        }
+
+        get phoneError() {
+                return this.phoneInput.locator('xpath=..').locator('.error');
+        }
 
 	// --- Email confirmation modal ---
 
