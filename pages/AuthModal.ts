@@ -7,9 +7,14 @@ export class AuthModal {
 	readonly loginTab: Locator;
 	readonly registerTab: Locator;
 
-	readonly emailInput: Locator;
-	readonly passwordInput: Locator;
-	readonly submitButton: Locator;
+        readonly emailInput: Locator;
+        readonly phoneInput: Locator;
+        readonly passwordInput: Locator;
+        readonly submitButton: Locator;
+
+        readonly emailMethodButton: Locator;
+        readonly phoneMethodButton: Locator;
+        readonly closeButton: Locator;
 
 	readonly ageCheckbox: Locator;
 	readonly termsCheckbox: Locator;
@@ -23,42 +28,62 @@ export class AuthModal {
 		this.loginTab = page.locator('div[role="dialog"] >> text=Войти');
 		this.registerTab = page.locator('div[role="dialog"] >> text=Регистрация');
 
-		this.emailInput = page.getByPlaceholder('Введите вашу электронную почту');
-		this.passwordInput = page.getByPlaceholder('Введите пароль');
+                this.emailInput = page.getByPlaceholder('Введите вашу электронную почту');
+                this.phoneInput = page.locator('input[name="phone"]');
+                this.passwordInput = page.getByPlaceholder('Введите пароль');
 
-		this.submitButton = page.getByRole('button', { name: 'Продолжить' });
+                this.submitButton = page.getByRole('button', { name: 'Продолжить' });
 
-		this.ageCheckbox = page.locator('input[name="isLegalAge"]');
-		this.termsCheckbox = page.locator('input[name="isTerms"]');
-		this.newsCheckbox = page.locator('input[name="isNews"]');
+                this.emailMethodButton = page.getByRole('button', { name: 'Почта' });
+                this.phoneMethodButton = page.getByRole('button', { name: 'Телефон' });
+                this.closeButton = page.locator('img[src*="close-dialog"]');
+
+                this.ageCheckbox = page.locator('input[name="isLegalAge"]');
+                this.termsCheckbox = page.locator('input[name="isTerms"]');
+                this.newsCheckbox = page.locator('input[name="isNews"]');
 	}
 
 	async waitForVisible() {
 		await expect(this.dialog).toBeVisible();
 	}
 
-	async switchToRegister() {
-		await this.registerTab.click();
-	}
+        async switchToRegister() {
+                await this.registerTab.click();
+        }
 
-	async switchToLogin() {
-		await this.loginTab.click();
-	}
+        async switchToEmailMethod() {
+                await this.emailMethodButton.click();
+        }
 
-	async login(email: string, password: string) {
-		await this.waitForVisible();
-		await this.switchToLogin();
+        async switchToPhoneMethod() {
+                await this.phoneMethodButton.click();
+        }
+
+        async switchToLogin() {
+                await this.loginTab.click();
+        }
+
+        async login(email: string, password: string) {
+                await this.waitForVisible();
+                await this.switchToLogin();
 
 		await this.emailInput.fill(email);
 		await this.passwordInput.fill(password);
 
 		await expect(this.submitButton).toBeEnabled();
-		await this.submitButton.click();
-	}
+                await this.submitButton.click();
+        }
 
-	async register(email: string, password: string) {
-		await this.waitForVisible();
-		await this.switchToRegister();
+        async close() {
+                await this.closeButton.click();
+                await expect(this.dialog).toBeHidden();
+        }
+
+        async register(email: string, password: string) {
+                await this.waitForVisible();
+                await this.switchToRegister();
+
+                await this.switchToEmailMethod();
 
 		await this.emailInput.fill(email);
 		await this.passwordInput.fill(password);
@@ -70,8 +95,24 @@ export class AuthModal {
 		await this.page.locator('label', { hasText: 'Я принимаю Условия и Положения' }).locator('span').first().click();
 
 		await expect(this.submitButton).toBeEnabled();
-		await this.submitButton.click();
-	}
+                await this.submitButton.click();
+        }
+
+        async registerByPhone(phone: string, password: string) {
+                await this.waitForVisible();
+                await this.switchToRegister();
+
+                await this.switchToPhoneMethod();
+
+                await this.phoneInput.fill(phone);
+                await this.passwordInput.fill(password);
+
+                await this.page.locator('label', { hasText: 'Мне есть 18 лет' }).locator('span').first().click();
+                await this.page.locator('label', { hasText: 'Я принимаю Условия и Положения' }).locator('span').first().click();
+
+                await expect(this.submitButton).toBeEnabled();
+                await this.submitButton.click();
+        }
 
 	// --- Email confirmation modal ---
 
@@ -116,10 +157,14 @@ export class AuthModal {
 		await this.resendButton.click();
 	}
 
-	async closeEmailConfirmationIfVisible() {
-		if (await this.isEmailConfirmationVisible()) {
-			await this.emailConfirmationCloseButton.click();
-			await expect(this.emailConfirmationDialog).toBeHidden();
-		}
-	}
+        async closeEmailConfirmationIfVisible() {
+                if (await this.isEmailConfirmationVisible()) {
+                        await this.emailConfirmationCloseButton.click();
+                        await expect(this.emailConfirmationDialog).toBeHidden();
+                }
+        }
+
+        get toastError() {
+                return this.page.locator('li[role="status"]:has-text("Ошибка регистрации")');
+        }
 }
