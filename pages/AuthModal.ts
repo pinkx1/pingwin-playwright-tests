@@ -108,15 +108,15 @@ export class AuthModal {
         }
 
         get emailError() {
-                return this.emailInput.locator('xpath=..').locator('.error');
+                return this.page.getByText('Неправильный адрес электронной почты');
         }
 
         get passwordError() {
-                return this.passwordInput.locator('xpath=..').locator('.error');
+                return this.page.getByText('Пароль должен содержать минимум 8 символов');
         }
 
         get phoneError() {
-                return this.phoneInput.locator('xpath=..').locator('.error');
+                return this.page.getByText('Обязательное поле');
         }
 
 	// --- Email confirmation modal ---
