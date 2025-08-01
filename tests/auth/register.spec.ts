@@ -33,64 +33,64 @@ test('новый пользователь может зарегистриров�
 
 	// Проверяем, что email в профиле — тот самый
 	const emailInput = page.getByPlaceholder('Ваша почта');
-        await expect(emailInput).toHaveValue(email);
+	await expect(emailInput).toHaveValue(email);
 });
 
 test('модалка регистрации открывается по кнопке и закрывается', async ({ page }) => {
-  const mainPage = new MainPage(page);
-  const authModal = new AuthModal(page);
+	const mainPage = new MainPage(page);
+	const authModal = new AuthModal(page);
 
-  await mainPage.open();
-  await mainPage.openRegisterModal();
+	await mainPage.open();
+	await mainPage.openRegisterModal();
 
-  await authModal.waitForVisible();
-  await expect(authModal.registerTab).toBeVisible();
-  await expect(await authModal.isEmailRegistrationSelected()).toBe(true);
+	await authModal.waitForVisible();
+	await expect(authModal.registerTab).toBeVisible();
+	await expect(await authModal.isEmailRegistrationSelected()).toBe(true);
 
-  await authModal.close();
-  await expect(authModal.dialog).toBeHidden();
+	await authModal.close();
+	await expect(authModal.dialog).toBeHidden();
 });
 
 const invalidEmail = 'notanemail';
 const shortPassword = '12345';
 
 test('валидация полей регистрации по email', async ({ page }) => {
-  const mainPage = new MainPage(page);
-  const authModal = new AuthModal(page);
+	const mainPage = new MainPage(page);
+	const authModal = new AuthModal(page);
 
-  await mainPage.open();
-  await mainPage.openRegisterModal();
-  await authModal.switchToRegister();
+	await mainPage.open();
+	await mainPage.openRegisterModal();
+	await authModal.switchToRegister();
 
-  await expect(authModal.submitButton).toBeDisabled();
-  await authModal.submitButton.click({ force: true });
-  await expect(authModal.emailError).toBeVisible();
-  await expect(authModal.passwordError).toBeVisible();
+	await expect(authModal.submitButton).toBeDisabled();
+	await authModal.submitButton.click({ force: true });
+	await expect(authModal.emailError).toBeVisible();
+	await expect(authModal.passwordError).toBeVisible();
 
-  await authModal.passwordInput.fill('Password123');
-  await expect(authModal.submitButton).toBeDisabled();
-  await expect(authModal.emailError).toBeVisible();
+	await authModal.passwordInput.fill('Password123');
+	await expect(authModal.submitButton).toBeDisabled();
+	await expect(authModal.emailError).toBeVisible();
 
-  await authModal.passwordInput.fill('');
-  await authModal.emailInput.fill(invalidEmail);
-  await expect(authModal.submitButton).toBeDisabled();
-  await expect(authModal.emailError).toBeVisible();
+	await authModal.passwordInput.fill('');
+	await authModal.emailInput.fill(invalidEmail);
+	await expect(authModal.submitButton).toBeDisabled();
+	await expect(authModal.emailError).toBeVisible();
 
-  await authModal.emailInput.fill('test@example.com');
-  await authModal.passwordInput.fill(shortPassword);
-  await expect(authModal.submitButton).toBeDisabled();
-  await expect(authModal.passwordError).toBeVisible();
+	await authModal.emailInput.fill('test@example.com');
+	await authModal.passwordInput.fill(shortPassword);
+	await expect(authModal.submitButton).toBeDisabled();
+	await expect(authModal.passwordError).toBeVisible();
 });
 
 test('нельзя зарегистрироваться с уже существующим email', async ({ page }) => {
-  const mainPage = new MainPage(page);
-  const authModal = new AuthModal(page);
+	const mainPage = new MainPage(page);
+	const authModal = new AuthModal(page);
 
-  await mainPage.open();
-  await mainPage.openRegisterModal();
+	await mainPage.open();
+	await mainPage.openRegisterModal();
 
-  await authModal.register(validUser.email, 'Password123!');
+	await authModal.register(validUser.email, 'Password123!');
 
-  const errorToast = page.locator('text=Ошибка регистрации');
-  await expect(errorToast).toBeVisible();
+	const errorToast = page.locator('text=Ошибка регистрации');
+	await expect(errorToast).toBeVisible();
 });
