@@ -62,24 +62,32 @@ test('валидация полей регистрации по email', async ({
 	await mainPage.openRegisterModal();
 	await authModal.switchToRegister();
 
-	await expect(authModal.submitButton).toBeDisabled();
-	await authModal.submitButton.click({ force: true });
-	await expect(authModal.emailError).toBeVisible();
-	await expect(authModal.passwordError).toBeVisible();
+        await expect(authModal.submitButton).toBeDisabled();
+
+        // Trigger validation messages by focusing and blurring each field
+        await authModal.emailInput.focus();
+        await authModal.emailInput.blur();
+        await expect(authModal.emailError).toBeVisible();
+
+        await authModal.passwordInput.focus();
+        await authModal.passwordInput.blur();
+        await expect(authModal.passwordError).toBeVisible();
 
 	await authModal.passwordInput.fill('Password123');
 	await expect(authModal.submitButton).toBeDisabled();
 	await expect(authModal.emailError).toBeVisible();
 
-	await authModal.passwordInput.fill('');
-	await authModal.emailInput.fill(invalidEmail);
-	await expect(authModal.submitButton).toBeDisabled();
-	await expect(authModal.emailError).toBeVisible();
+        await authModal.passwordInput.fill('');
+        await authModal.emailInput.fill(invalidEmail);
+        await authModal.emailInput.blur();
+        await expect(authModal.submitButton).toBeDisabled();
+        await expect(authModal.emailError).toBeVisible();
 
-	await authModal.emailInput.fill('test@example.com');
-	await authModal.passwordInput.fill(shortPassword);
-	await expect(authModal.submitButton).toBeDisabled();
-	await expect(authModal.passwordError).toBeVisible();
+        await authModal.emailInput.fill('test@example.com');
+        await authModal.passwordInput.fill(shortPassword);
+        await authModal.passwordInput.blur();
+        await expect(authModal.submitButton).toBeDisabled();
+        await expect(authModal.passwordError).toBeVisible();
 });
 
 test('нельзя зарегистрироваться с уже существующим email', async ({ page }) => {
@@ -91,6 +99,6 @@ test('нельзя зарегистрироваться с уже существ
 
 	await authModal.register(validUser.email, 'Password123!');
 
-	const errorToast = page.locator('text=Ошибка регистрации');
-	await expect(errorToast).toBeVisible();
+        const errorToast = page.locator('li[role="status"]:has-text("Ошибка регистрации")');
+        await expect(errorToast).toBeVisible();
 });
