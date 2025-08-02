@@ -1,15 +1,22 @@
 import { test, expect } from '@playwright/test';
 import { MainPage } from '../../pages/MainPage';
 import { AuthModal } from '../../pages/AuthModal';
-import { validUser } from '../../fixtures/userData';
+import { validUser, existingPhoneUser } from '../../fixtures/userData';
 
 function generateRandomGmail(): string {
   const prefix = Math.random().toString(36).substring(2, 10);
   return `${prefix}@gmail.com`;
 }
 
+function generateRandomPhone(): string {
+  const suffix = Math.floor(Math.random() * 90 + 10);
+  return `(33)211-39-${suffix}`;
+}
+
 const invalidEmail = 'notanemail';
-const shortPassword = '12345';
+const sevenCharPassword = '1234567';
+const eightCharLetterPassword = '1234567a';
+const eightDigitsPassword = '12345678';
 
 async function checkRequiredCheckboxes(page) {
   await page.locator('label', { hasText: 'Мне есть 18 лет' }).locator('span').first().click();
@@ -58,6 +65,7 @@ test('registration form contains all required fields', async ({ page }) => {
 
   await authModal.switchToPhone();
   await expect(authModal.phoneInput).toBeVisible();
+  await expect(authModal.passwordInput).toBeVisible();
 });
 
 // 4. Validation: no email
@@ -152,8 +160,8 @@ test('invalid email is rejected', async ({ page }) => {
   await expect(authModal.submitButton).toBeDisabled();
 });
 
-// 9. Validation: invalid password
-test('invalid password is rejected', async ({ page }) => {
+// 9. Password validation rules
+test('password validation enforces length and character requirements', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
@@ -162,12 +170,28 @@ test('invalid password is rejected', async ({ page }) => {
   await authModal.switchToRegister();
 
   await authModal.emailInput.fill('test@example.com');
-  await authModal.passwordInput.fill(shortPassword);
-  await authModal.passwordInput.blur();
   await checkRequiredCheckboxes(page);
 
-  await expect(authModal.passwordError).toBeVisible();
-  await expect(authModal.submitButton).toBeDisabled();
+  await test.step('rejects passwords shorter than 8 characters', async () => {
+    await authModal.passwordInput.fill(sevenCharPassword);
+    await authModal.passwordInput.blur();
+    await expect(authModal.passwordError).toBeVisible();
+    await expect(authModal.submitButton).toBeDisabled();
+  });
+
+  await test.step('accepts passwords of 8 characters with letters', async () => {
+    await authModal.passwordInput.fill(eightCharLetterPassword);
+    await authModal.passwordInput.blur();
+    await expect(authModal.passwordError).toBeHidden();
+    await expect(authModal.submitButton).toBeEnabled();
+  });
+
+  await test.step('rejects passwords of 8 digits without letters', async () => {
+    await authModal.passwordInput.fill(eightDigitsPassword);
+    await authModal.passwordInput.blur();
+    await expect(authModal.passwordError).toBeVisible();
+    await expect(authModal.submitButton).toBeDisabled();
+  });
 });
 
 // 10. Successful registration
@@ -189,7 +213,30 @@ test('new user can register and access profile', async ({ page }) => {
   await expect(emailInput).toHaveValue(email);
 });
 
-// 11. Registration with existing email
+// 11. Successful registration by phone
+test('new user can register by phone', async ({ page }) => {
+  const mainPage = new MainPage(page);
+  const authModal = new AuthModal(page);
+  const phone = generateRandomPhone();
+  const password = 'TestPassword123!';
+
+  await mainPage.open();
+  await mainPage.openRegisterModal();
+  await authModal.registerByPhone(phone, password);
+
+  const closeIcon = page.locator('img[src*="close-dialog"]');
+  await closeIcon.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+  if (await closeIcon.isVisible()) {
+    await closeIcon.click();
+  }
+
+  await page.locator('a[href="/ru/profile"]').click();
+
+  const phoneInput = page.getByPlaceholder(/телефон/i);
+  await expect(phoneInput).toHaveValue(phone);
+});
+
+// 12. Registration with existing email
 test('registration with existing email fails', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
@@ -202,23 +249,20 @@ test('registration with existing email fails', async ({ page }) => {
   await expect(errorToast).toBeVisible();
 });
 
-// 12. Registration with existing phone number
+// 13. Registration with existing phone number
 test('registration with existing phone fails', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
   await mainPage.open();
   await mainPage.openRegisterModal();
-  await authModal.switchToRegister();
-  await authModal.switchToPhone();
-
-  await authModal.registerByPhone('+79998887766', 'Password123!');
+  await authModal.registerByPhone(existingPhoneUser.phone, existingPhoneUser.password);
 
   const errorToast = page.locator('li[role="status"]:has-text("Ошибка регистрации")');
   await expect(errorToast).toBeVisible();
 });
 
-// 13. Registration without agreeing to terms
+// 14. Registration without agreeing to terms
 test('registration without accepting terms is disabled', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
@@ -234,7 +278,7 @@ test('registration without accepting terms is disabled', async ({ page }) => {
   await expect(authModal.submitButton).toBeDisabled();
 });
 
-// 14. Registration without confirming age
+// 15. Registration without confirming age
 test('registration under 18 is disabled', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
