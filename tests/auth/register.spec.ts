@@ -5,7 +5,7 @@ import { validUser, existingPhoneUser } from '../../fixtures/userData';
 
 function generateAutotestEmail(): string {
   const prefix = `autotest_${Math.random().toString(36).substring(2, 10)}`;
-  return `${prefix}@temp-mail.org`;
+  return `${prefix}@gmail.com`;
 }
 
 function generateRandomPhone(): string {
