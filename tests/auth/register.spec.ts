@@ -3,9 +3,9 @@ import { MainPage } from '../../pages/MainPage';
 import { AuthModal } from '../../pages/AuthModal';
 import { validUser, existingPhoneUser } from '../../fixtures/userData';
 
-function generateRandomGmail(): string {
-  const prefix = Math.random().toString(36).substring(2, 10);
-  return `${prefix}@gmail.com`;
+function generateAutotestEmail(): string {
+  const prefix = `autotest_${Math.random().toString(36).substring(2, 10)}`;
+  return `${prefix}@temp-mail.org`;
 }
 
 function generateRandomPhone(): string {
@@ -224,7 +224,7 @@ test('password of 8 digits without letters is rejected', async ({ page }) => {
 test('new user can register and access profile', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
-  const email = generateRandomGmail();
+  const email = generateAutotestEmail();
   const password = 'TestPassword123!';
 
   await mainPage.open();
