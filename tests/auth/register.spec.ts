@@ -348,5 +348,8 @@ test('email confirmation removes confirm button', async ({ page }) => {
   await page.locator('a[href="/ru/profile"]').waitFor({ state: 'visible' });
   await page.locator('a[href="/ru/profile"]').click();
 
+  await page.waitForURL('**/profile');
+  await expect(page.getByPlaceholder('Ваша почта')).toBeVisible();
+
   await expect(page.getByRole('button', { name: 'Подтвердить' })).toHaveCount(0);
 });
