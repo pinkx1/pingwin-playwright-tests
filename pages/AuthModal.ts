@@ -111,8 +111,12 @@ export class AuthModal {
                 return this.page.getByText('Неправильный адрес электронной почты');
         }
 
-        get passwordError() {
+        get passwordLengthError() {
                 return this.page.getByText('Пароль должен содержать минимум 8 символов');
+        }
+
+        get passwordLetterError() {
+                return this.page.getByText('Пароль должен содержать как минимум одну букву');
         }
 
         get phoneError() {
