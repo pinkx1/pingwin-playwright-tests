@@ -17,6 +17,8 @@ const invalidEmail = 'notanemail';
 const sevenCharPassword = '1234567';
 const eightCharLetterPassword = '1234567a';
 const eightDigitsPassword = '12345678';
+const passwordLengthError = 'Пароль должен содержать минимум 8 символов';
+const passwordLetterError = 'Пароль должен содержать как минимум одну букву';
 
 async function checkRequiredCheckboxes(page) {
   await page.locator('label', { hasText: 'Мне есть 18 лет' }).locator('span').first().click();
@@ -100,7 +102,7 @@ test('cannot register without password', async ({ page }) => {
   await authModal.passwordInput.blur();
   await checkRequiredCheckboxes(page);
 
-  await expect(authModal.passwordError).toBeVisible();
+  await expect(authModal.passwordLengthError).toHaveText(passwordLengthError);
   await expect(authModal.submitButton).toBeDisabled();
 });
 
@@ -138,7 +140,7 @@ test('cannot register by phone without password', async ({ page }) => {
   await authModal.passwordInput.blur();
   await checkRequiredCheckboxes(page);
 
-  await expect(authModal.passwordError).toBeVisible();
+  await expect(authModal.passwordLengthError).toHaveText(passwordLengthError);
   await expect(authModal.submitButton).toBeDisabled();
 });
 
@@ -160,8 +162,8 @@ test('invalid email is rejected', async ({ page }) => {
   await expect(authModal.submitButton).toBeDisabled();
 });
 
-// 9. Password validation rules
-test('password validation enforces length and character requirements', async ({ page }) => {
+// 9. Password shorter than 8 characters is rejected
+test('password shorter than 8 characters is rejected', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
@@ -172,29 +174,53 @@ test('password validation enforces length and character requirements', async ({ 
   await authModal.emailInput.fill('test@example.com');
   await checkRequiredCheckboxes(page);
 
-  await test.step('rejects passwords shorter than 8 characters', async () => {
-    await authModal.passwordInput.fill(sevenCharPassword);
-    await authModal.passwordInput.blur();
-    await expect(authModal.passwordError).toBeVisible();
-    await expect(authModal.submitButton).toBeDisabled();
-  });
+  await authModal.passwordInput.fill(sevenCharPassword);
+  await authModal.passwordInput.blur();
 
-  await test.step('accepts passwords of 8 characters with letters', async () => {
-    await authModal.passwordInput.fill(eightCharLetterPassword);
-    await authModal.passwordInput.blur();
-    await expect(authModal.passwordError).toBeHidden();
-    await expect(authModal.submitButton).toBeEnabled();
-  });
-
-  await test.step('rejects passwords of 8 digits without letters', async () => {
-    await authModal.passwordInput.fill(eightDigitsPassword);
-    await authModal.passwordInput.blur();
-    await expect(authModal.passwordError).toBeVisible();
-    await expect(authModal.submitButton).toBeDisabled();
-  });
+  await expect(authModal.passwordLengthError).toHaveText(passwordLengthError);
+  await expect(authModal.submitButton).toBeDisabled();
 });
 
-// 10. Successful registration
+// 10. Password of 8 characters with letters is accepted
+test('password of 8 characters with letters is accepted', async ({ page }) => {
+  const mainPage = new MainPage(page);
+  const authModal = new AuthModal(page);
+
+  await mainPage.open();
+  await mainPage.openRegisterModal();
+  await authModal.switchToRegister();
+
+  await authModal.emailInput.fill('test@example.com');
+  await checkRequiredCheckboxes(page);
+
+  await authModal.passwordInput.fill(eightCharLetterPassword);
+  await authModal.passwordInput.blur();
+
+  await expect(authModal.passwordLengthError).toBeHidden();
+  await expect(authModal.passwordLetterError).toBeHidden();
+  await expect(authModal.submitButton).toBeEnabled();
+});
+
+// 11. Password of 8 digits without letters is rejected
+test('password of 8 digits without letters is rejected', async ({ page }) => {
+  const mainPage = new MainPage(page);
+  const authModal = new AuthModal(page);
+
+  await mainPage.open();
+  await mainPage.openRegisterModal();
+  await authModal.switchToRegister();
+
+  await authModal.emailInput.fill('test@example.com');
+  await checkRequiredCheckboxes(page);
+
+  await authModal.passwordInput.fill(eightDigitsPassword);
+  await authModal.passwordInput.blur();
+
+  await expect(authModal.passwordLetterError).toHaveText(passwordLetterError);
+  await expect(authModal.submitButton).toBeDisabled();
+});
+
+// 12. Successful registration
 test('new user can register and access profile', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
@@ -213,7 +239,7 @@ test('new user can register and access profile', async ({ page }) => {
   await expect(emailInput).toHaveValue(email);
 });
 
-// 11. Successful registration by phone
+// 13. Successful registration by phone
 test('new user can register by phone', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
@@ -224,11 +250,11 @@ test('new user can register by phone', async ({ page }) => {
   await mainPage.openRegisterModal();
   await authModal.registerByPhone(phone, password);
 
-  const closeIcon = page.locator('img[src*="close-dialog"]');
-  await closeIcon.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-  if (await closeIcon.isVisible()) {
-    await closeIcon.click();
-  }
+  const smsDialog = page.locator('div[role="dialog"]').last();
+  const closeIcon = smsDialog.locator('img[src*="close-dialog"]');
+  await closeIcon.waitFor({ state: 'visible', timeout: 5000 });
+  await closeIcon.click();
+  await expect(smsDialog).toBeHidden();
 
   await page.locator('a[href="/ru/profile"]').click();
 
@@ -236,7 +262,7 @@ test('new user can register by phone', async ({ page }) => {
   await expect(phoneInput).toHaveValue(phone);
 });
 
-// 12. Registration with existing email
+// 14. Registration with existing email
 test('registration with existing email fails', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
@@ -249,7 +275,7 @@ test('registration with existing email fails', async ({ page }) => {
   await expect(errorToast).toBeVisible();
 });
 
-// 13. Registration with existing phone number
+// 15. Registration with existing phone number
 test('registration with existing phone fails', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
@@ -262,7 +288,7 @@ test('registration with existing phone fails', async ({ page }) => {
   await expect(errorToast).toBeVisible();
 });
 
-// 14. Registration without agreeing to terms
+// 16. Registration without agreeing to terms
 test('registration without accepting terms is disabled', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
@@ -278,7 +304,7 @@ test('registration without accepting terms is disabled', async ({ page }) => {
   await expect(authModal.submitButton).toBeDisabled();
 });
 
-// 15. Registration without confirming age
+// 17. Registration without confirming age
 test('registration under 18 is disabled', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
