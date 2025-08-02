@@ -111,8 +111,12 @@ export class AuthModal {
                 return this.page.getByText('Неправильный адрес электронной почты');
         }
 
-        get passwordError() {
+        get passwordLengthError() {
                 return this.page.getByText('Пароль должен содержать минимум 8 символов');
+        }
+
+        get passwordLetterError() {
+                return this.page.getByText('Пароль должен содержать как минимум одну букву');
         }
 
         get phoneError() {
@@ -162,10 +166,25 @@ export class AuthModal {
 		await this.resendButton.click();
 	}
 
-	async closeEmailConfirmationIfVisible() {
-		if (await this.isEmailConfirmationVisible()) {
-			await this.emailConfirmationCloseButton.click();
-			await expect(this.emailConfirmationDialog).toBeHidden();
-		}
-	}
+        async closeEmailConfirmationIfVisible() {
+                if (await this.isEmailConfirmationVisible()) {
+                        await this.emailConfirmationCloseButton.click();
+                        await expect(this.emailConfirmationDialog).toBeHidden();
+                }
+        }
+
+       // --- SMS confirmation modal ---
+
+       async closeSmsConfirmationIfVisible() {
+               const dialogs = this.page.locator('div[role="dialog"]');
+               const smsDialog = dialogs.last();
+               const closeButton = smsDialog.locator('img[src*="close-dialog"]');
+               try {
+                       await closeButton.waitFor({ state: 'visible', timeout: 5000 });
+                       await closeButton.click();
+                       await expect(smsDialog).toBeHidden();
+               } catch {
+                       // SMS confirmation did not appear
+               }
+       }
 }
