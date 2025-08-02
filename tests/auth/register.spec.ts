@@ -254,7 +254,7 @@ test('new user can register by phone', async ({ page }) => {
 
   await page.locator('a[href="/ru/profile"]').click();
 
-  const phoneInput = page.getByPlaceholder(/телефон/i);
+  const phoneInput = page.locator('#phone-input input[name="phone"]');
   await expect(phoneInput).toHaveValue(phone);
 });
 
