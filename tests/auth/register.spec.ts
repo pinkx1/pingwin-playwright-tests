@@ -249,12 +249,8 @@ test('new user can register by phone', async ({ page }) => {
   await mainPage.open();
   await mainPage.openRegisterModal();
   await authModal.registerByPhone(phone, password);
-
-  const smsDialog = page.locator('div[role="dialog"]').last();
-  const closeIcon = smsDialog.locator('img[src*="close-dialog"]');
-  await closeIcon.waitFor({ state: 'visible', timeout: 5000 });
-  await closeIcon.click();
-  await expect(smsDialog).toBeHidden();
+  await authModal.closeSmsConfirmationIfVisible();
+  await authModal.close();
 
   await page.locator('a[href="/ru/profile"]').click();
 
