@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { MailSlurp } from 'mailslurp-client';
 import { MainPage } from '../../pages/MainPage';
 import { AuthModal } from '../../pages/AuthModal';
 import { validUser, existingPhoneUser } from '../../fixtures/userData';
@@ -314,4 +315,41 @@ test('registration under 18 is disabled', async ({ page }) => {
   await page.locator('label', { hasText: 'Я принимаю Условия и Положения' }).locator('span').first().click();
 
   await expect(authModal.submitButton).toBeDisabled();
+});
+
+// 18. Email confirmation removes confirm button
+test('email confirmation removes confirm button', async ({ page }) => {
+  const mainPage = new MainPage(page);
+  const authModal = new AuthModal(page);
+  const mailslurp = new MailSlurp({ apiKey: 'fecc6dbfce5284fda12515749ca6915bbe7f2532bd3d22b31c3f719117463573' });
+
+  const inbox = await mailslurp.inboxController.createInboxWithDefaults();
+  const email = inbox.emailAddress as string;
+  const password = 'TestPassword123!';
+
+  await mainPage.open();
+  await mainPage.openRegisterModal();
+  await authModal.register(email, password);
+
+  await authModal.waitForEmailConfirmation();
+
+  const latestEmail = await mailslurp.waitController.waitForLatestEmail({
+    inboxId: inbox.id!,
+    timeout: 60000,
+    unreadOnly: true,
+  });
+
+  const confirmationLinkMatch = latestEmail.body?.match(/https?:\/\/[^\s]+/);
+  expect(confirmationLinkMatch).not.toBeNull();
+  const confirmationLink = confirmationLinkMatch![0];
+
+  await page.goto(confirmationLink);
+
+  await page.locator('a[href="/ru/profile"]').waitFor({ state: 'visible' });
+  await page.locator('a[href="/ru/profile"]').click();
+
+  await page.waitForURL('**/profile');
+  await expect(page.getByPlaceholder('Ваша почта')).toBeVisible();
+
+  await expect(page.getByRole('button', { name: 'Подтвердить' })).toHaveCount(0);
 });

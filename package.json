@@ -14,5 +14,8 @@
 	"devDependencies": {
 		"@playwright/test": "^1.54.1",
 		"@types/node": "^24.1.0"
+	},
+	"dependencies": {
+		"mailslurp-client": "^15.24.2"
 	}
 }
