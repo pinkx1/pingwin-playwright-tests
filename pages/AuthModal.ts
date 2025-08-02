@@ -59,10 +59,17 @@ export class AuthModal {
                 return this.emailInput.isVisible();
         }
 
-        async close() {
-                await this.closeButton.click();
-                await expect(this.dialog).toBeHidden();
-        }
+       async close() {
+               if (await this.dialog.isVisible()) {
+                       try {
+                               await this.closeButton.waitFor({ state: 'visible', timeout: 5000 });
+                               await this.closeButton.click();
+                       } catch {
+                               // Auth modal may already be closed
+                       }
+                       await expect(this.dialog).toBeHidden();
+               }
+       }
 
 	async login(email: string, password: string) {
 		await this.waitForVisible();
