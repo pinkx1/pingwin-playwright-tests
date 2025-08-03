@@ -10,8 +10,9 @@ function generateAutotestEmail(): string {
 }
 
 function generateRandomPhone(): string {
-  const suffix = Math.floor(Math.random() * 90 + 10);
-  return `(33)211-39-${suffix}`;
+  const middle = Math.floor(Math.random() * 90 + 10);
+  const last = Math.floor(Math.random() * 90 + 10);
+  return `(33)211-${middle}-${last}`;
 }
 
 const invalidEmail = 'notanemail';
@@ -251,9 +252,10 @@ test('new user can register by phone', async ({ page }) => {
   await mainPage.openRegisterModal();
   await authModal.registerByPhone(phone, password);
   await authModal.closeSmsConfirmationIfVisible();
-  await authModal.close();
-
-  await page.locator('a[href="/ru/profile"]').click();
+  const profileLink = page.locator('a[href="/ru/profile"]').first();
+  await profileLink.waitFor({ state: 'visible', timeout: 10000 });
+  await profileLink.click();
+  await expect(page).toHaveURL(/\/ru\/profile/);
 
   const phoneInput = page.locator('#phone-input input[name="phone"]');
   await expect(phoneInput).toHaveValue(phone);
