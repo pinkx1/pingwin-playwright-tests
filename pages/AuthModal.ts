@@ -193,5 +193,16 @@ export class AuthModal {
                } catch {
                        // SMS confirmation did not appear
                }
+
+               try {
+                       const mainDialog = dialogs.first();
+                       if (await mainDialog.isVisible()) {
+                               const mainClose = mainDialog.locator('img[src*="close-dialog"]');
+                               await mainClose.click({ timeout: 5000 });
+                               await expect(mainDialog).toBeHidden();
+                       }
+               } catch {
+                       // main auth modal already closed
+               }
        }
 }
