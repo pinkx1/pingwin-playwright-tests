@@ -184,10 +184,10 @@ export class AuthModal {
 
        async closeSmsConfirmationIfVisible() {
                const dialogs = this.page.locator('div[role="dialog"]');
-               const smsDialog = dialogs.last();
-               const closeButton = smsDialog.locator('img[src*="close-dialog"]');
                try {
-                       await closeButton.waitFor({ state: 'visible', timeout: 5000 });
+                       await expect(dialogs).toHaveCount(2, { timeout: 10000 });
+                       const smsDialog = dialogs.nth(1);
+                       const closeButton = smsDialog.locator('img[src*="close-dialog"]');
                        await closeButton.click();
                        await expect(smsDialog).toBeHidden();
                } catch {
