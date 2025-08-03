@@ -1,4 +1,15 @@
 import { test, expect } from '@playwright/test';
+import { MainPage } from '../../pages/MainPage';
+import { AuthModal } from '../../pages/AuthModal';
+import { validUser } from '../../fixtures/userData';
+
+test.beforeEach(async ({ page }) => {
+  const mainPage = new MainPage(page);
+  const authModal = new AuthModal(page);
+  await mainPage.open();
+  await mainPage.openLoginModal();
+  await authModal.login(validUser.email, validUser.password);
+});
 
 // Tests for Games page
 
