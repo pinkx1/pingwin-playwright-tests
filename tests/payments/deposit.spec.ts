@@ -26,8 +26,7 @@ test.describe('Deposit feature', () => {
     const modal = new DepositModal(page);
     for (const [currency, methods] of Object.entries(depositMethods)) {
       await modal.selectCurrency(currency);
-      const list = await modal.getPaymentMethods();
-      expect(list).toEqual(methods);
+      await modal.waitForPaymentMethods(methods);
     }
   });
 
@@ -35,6 +34,7 @@ test.describe('Deposit feature', () => {
     const modal = new DepositModal(page);
     for (const [currency, methods] of Object.entries(minDeposit)) {
       await modal.selectCurrency(currency);
+      await modal.waitForPaymentMethods(depositMethods[currency]);
       for (const [method, amount] of Object.entries(methods)) {
         await modal.openPaymentMethod(method);
         const minValue = await modal.getMinDeposit();
@@ -44,6 +44,7 @@ test.describe('Deposit feature', () => {
           await expect(modal.depositButton).toBeDisabled();
         }
         await modal.goBack();
+        await modal.waitForPaymentMethods(depositMethods[currency]);
       }
     }
   });
