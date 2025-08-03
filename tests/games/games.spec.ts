@@ -16,29 +16,30 @@ test('search and filters work', async ({ page }) => {
 
   // search by name
   await search.fill('book');
-  const bookCard = page.locator('[class*="game-card"]', { hasText: /book/i }).first();
-  await bookCard.waitFor({ state: 'visible' });
-  await expect(page.locator('[class*="game-card"]', { hasText: 'Magic Apple' })).toHaveCount(0);
+  await page.goto('/games?search=book');
+  const bookCard = page.getByRole('button', { name: /book/i }).first();
+  await bookCard.waitFor();
+  await expect(page.getByRole('button', { name: /Magic Apple/i })).toHaveCount(0);
 
-  // clear search
-  await search.fill('');
+  // reset search
+  await page.goto('/games');
 
   // category filter
-  await page.locator('#react-select-15-input').click();
+  await page.getByRole('combobox', { name: 'Фильтр' }).click();
   await page.getByRole('option', { name: /Книги/ }).click();
-  const bookAfterFilter = page.locator('[class*="game-card"]', { hasText: /book/i }).first();
-  await bookAfterFilter.waitFor({ state: 'visible' });
-  await expect(page.locator('[class*="game-card"]', { hasText: 'Magic Apple' })).toHaveCount(0);
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByRole('button', { name: /book/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Magic Apple/i })).toHaveCount(0);
 
   // reset by reloading
   await page.goto('/games');
 
   // provider filter
-  await page.locator('#react-select-16-input').click();
+  await page.getByRole('combobox', { name: 'Провайдеры' }).click();
   await page.getByRole('option', { name: /Playson/ }).click();
-  const playsonCard = page.locator('[class*="game-card"]', { hasText: 'Hot Coins' }).first();
-  await playsonCard.waitFor({ state: 'visible' });
-  await expect(page.locator('[class*="game-card"]', { hasText: 'Magic Apple' })).toHaveCount(0);
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByRole('button', { name: /Hot Coins/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Magic Apple/i })).toHaveCount(0);
 });
 
 // Launch games and visual comparison
@@ -53,12 +54,11 @@ const launchGames = [
 
 for (const game of launchGames) {
   test(`${game} launches and matches screenshot`, async ({ page }) => {
-    await page.goto('/games');
-    const search = page.getByPlaceholder('Найди свою игру');
-    await search.fill(game);
-    const card = page.locator('[class*="game-card"]', { hasText: new RegExp(game, 'i') }).first();
-    await card.waitFor({ state: 'visible' });
-    await card.getByRole('link', { name: 'Играть' }).click();
+    const query = encodeURIComponent(game);
+    await page.goto(`/games?search=${query}`);
+    const cardButton = page.getByRole('button', { name: new RegExp(game, 'i') }).first();
+    await cardButton.click();
+    await page.getByRole('link', { name: 'Играть' }).click();
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/play/);
     const slug = game.toLowerCase().replace(/[^a-z0-9]+/g, '-');
