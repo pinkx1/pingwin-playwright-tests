@@ -43,15 +43,20 @@ test('session token is stored after login', async ({ page }) => {
 
   await mainPage.open();
   const before = await page.context().cookies();
+
+  // Убедиться, что cookie sessionId отсутствует до входа или пустая
+  const sessionBefore = before.find(c => c.name === 'sessionId');
+  expect(sessionBefore?.value ?? '').toBe('');
+
   await mainPage.openLoginModal();
   await authModal.login(validUser.email, validUser.password);
-  const after = await page.context().cookies();
 
-  const diff = after.filter(a => {
-    return !before.some(b => b.name === a.name && b.value === a.value);
-  });
-
-  expect(diff.length).toBeGreaterThan(0);
+  await expect
+    .poll(async () => {
+      const cookies = await page.context().cookies();
+      return cookies.find(c => c.name === 'sessionId')?.value;
+    })
+    .toBeTruthy();
 });
 
 // 4. Открытие формы входа меняет URL
