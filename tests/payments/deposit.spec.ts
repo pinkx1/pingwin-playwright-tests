@@ -31,6 +31,7 @@ test.describe('Deposit feature', () => {
   });
 
   test('minimal deposit amounts are correct', async ({ page }) => {
+    test.setTimeout(120_000); // Increase timeout for this test due to multiple interactions
     const modal = new DepositModal(page);
     for (const [currency, methods] of Object.entries(minDeposit)) {
       await modal.selectCurrency(currency);
