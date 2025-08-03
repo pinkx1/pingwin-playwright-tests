@@ -12,6 +12,7 @@ test('add and remove game from favourites', async ({ page }) => {
   await page.goto('/games?search=Magic%20Apple');
   const card = page.getByRole('button', { name: /Magic Apple/ }).first();
   await card.waitFor();
+  await card.hover();
   await card.locator('img[src*="heart-unfilled"]').click();
   await expect(card.locator('img[src*="heart-filled"]').first()).toBeVisible();
 
@@ -19,6 +20,7 @@ test('add and remove game from favourites', async ({ page }) => {
   await page.goto('/games/favorite');
   const favCard = page.getByRole('button', { name: /Magic Apple/ }).first();
   await favCard.waitFor();
+  await favCard.hover();
 
   // remove from favourites
   await favCard.locator('img[src*="heart-filled"]').click();
