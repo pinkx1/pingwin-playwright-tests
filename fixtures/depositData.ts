@@ -1,5 +1,13 @@
 export const depositMethods: Record<string, string[]> = {
-  USD: ['Binance Pay', 'Tether USD (Tron)', 'Bitcoin', 'Ethereum', 'Tron', 'Toncoin'],
+  USD: [
+    'Binance Pay',
+    'Tether USD (Tron)',
+    'Tether USD (Ethereum)',
+    'Bitcoin',
+    'Ethereum',
+    'Tron',
+    'Toncoin'
+  ],
   EUR: [
     'Банковская карта (от €6)',
     'Банковская карта (от €10)',

@@ -33,6 +33,12 @@ export class DepositModal {
     await this.page.locator(`.currency-select__option img[src*="/${code}.png"]`).first().click();
   }
 
+  async waitForPaymentMethods(expected: string[]) {
+    await expect(
+      this.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18')
+    ).toHaveText(expected);
+  }
+
   async getPaymentMethods(): Promise<string[]> {
     const names = await this.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18').allTextContents();
     return names.map(n => n.trim());
@@ -40,10 +46,12 @@ export class DepositModal {
 
   async openPaymentMethod(name: string) {
     await this.dialog.locator('div.sc-90dc3735-3').locator(`text="${name}"`).first().click();
+    await this.dialog.getByText('Назад').waitFor();
   }
 
   async goBack() {
     await this.dialog.getByText('Назад').click();
+    await this.dialog.getByText('Назад').waitFor({ state: 'hidden' });
   }
 
   get amountInput() {
@@ -55,18 +63,16 @@ export class DepositModal {
   }
 
   async getMinDeposit(): Promise<number> {
-    const primary = this.dialog
-      .getByText('Минимальный депозит')
-      .locator('..')
-      .locator('.sc-1d93ec92-19');
-    if (await primary.count()) {
+    const primaryLabel = this.dialog.getByText('Минимальный депозит');
+    if (await primaryLabel.count()) {
+      await primaryLabel.waitFor();
+      const primary = primaryLabel.locator('..').locator('.sc-1d93ec92-19');
       const text = await primary.first().textContent();
       return this.parseAmount(text || '');
     }
-    const alt = this.dialog
-      .getByText('Минимальная сумма пополнения')
-      .locator('..')
-      .locator('.sc-1d93ec92-19');
+    const altLabel = this.dialog.getByText('Минимальная сумма пополнения');
+    await altLabel.waitFor();
+    const alt = altLabel.locator('..').locator('.sc-1d93ec92-19');
     const text = await alt.first().textContent();
     return this.parseAmount(text || '');
   }
