@@ -57,6 +57,7 @@ for (const game of launchGames) {
     const query = encodeURIComponent(game);
     await page.goto(`/games?search=${query}`);
     const cardButton = page.getByRole('button', { name: new RegExp(game, 'i') }).first();
+    await cardButton.hover();
     await cardButton.click();
     await page.getByRole('link', { name: 'Играть' }).click();
     await page.waitForLoadState('networkidle');
