@@ -11,34 +11,36 @@ test('loads and displays game list with images', async ({ page }) => {
 });
 
 test('search and filters work', async ({ page }) => {
-  await page.goto('/games', { waitUntil: 'networkidle' });
+  await page.goto('/games');
   const search = page.getByPlaceholder('Найди свою игру');
 
   // search by name
   await search.fill('book');
-  await page.goto('/games?search=book', { waitUntil: 'networkidle' });
+  await page.goto('/games?search=book');
   const bookCard = page.getByRole('button', { name: /book/i }).first();
   await bookCard.waitFor();
   await expect(page.getByRole('button', { name: /Magic Apple/i })).toHaveCount(0);
 
   // reset search
-  await page.goto('/games', { waitUntil: 'networkidle' });
+  await page.goto('/games');
+  await page.getByRole('button', { name: /Magic Apple/i }).first().waitFor();
 
   // category filter
   await page.getByRole('combobox', { name: 'Фильтр' }).click();
   await page.getByRole('option', { name: /Книги/ }).click();
-  await page.waitForLoadState('networkidle');
-  await expect(page.getByRole('button', { name: /book/i })).toBeVisible();
+  const bookFiltered = page.getByRole('button', { name: /book/i }).first();
+  await bookFiltered.waitFor();
   await expect(page.getByRole('button', { name: /Magic Apple/i })).toHaveCount(0);
 
   // reset by reloading
-  await page.goto('/games', { waitUntil: 'networkidle' });
+  await page.goto('/games');
+  await page.getByRole('button', { name: /Magic Apple/i }).first().waitFor();
 
   // provider filter
   await page.getByRole('combobox', { name: 'Провайдеры' }).click();
   await page.getByRole('option', { name: /Playson/ }).click();
-  await page.waitForLoadState('networkidle');
-  await expect(page.getByRole('button', { name: /Hot Coins/i })).toBeVisible();
+  const playsonGame = page.getByRole('button', { name: /Hot Coins/i }).first();
+  await playsonGame.waitFor();
   await expect(page.getByRole('button', { name: /Magic Apple/i })).toHaveCount(0);
 });
 

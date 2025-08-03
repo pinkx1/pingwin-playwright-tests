@@ -5,11 +5,12 @@ import { test, expect } from '@playwright/test';
 test('add and remove game from favourites', async ({ page }) => {
   // ensure favourites empty
   await page.goto('/games/favorite');
-  await page.waitForLoadState('networkidle');
-  await expect(page.getByText('Мы не нашли таких игр')).toBeVisible();
+  const emptyState = page.getByText('Мы не нашли таких игр');
+  await emptyState.waitFor();
+  await expect(emptyState).toBeVisible();
 
   // add game to favourites
-  await page.goto('/games?search=Magic%20Apple', { waitUntil: 'networkidle' });
+  await page.goto('/games?search=Magic%20Apple');
   const card = page.getByRole('button', { name: /Magic Apple/ }).first();
   await card.scrollIntoViewIfNeeded();
   await card.hover();
@@ -22,6 +23,7 @@ test('add and remove game from favourites', async ({ page }) => {
   // verify in favourites
   await page.goto('/games/favorite');
   const favCard = page.getByRole('button', { name: /Magic Apple/ }).first();
+  await favCard.waitFor();
   await favCard.scrollIntoViewIfNeeded();
   await favCard.hover();
 
