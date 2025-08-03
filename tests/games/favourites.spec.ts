@@ -9,18 +9,16 @@ test('add and remove game from favourites', async ({ page }) => {
   await expect(page.getByText('Мы не нашли таких игр')).toBeVisible();
 
   // add game to favourites
-  await page.goto('/games');
-  const search = page.getByPlaceholder('Найди свою игру');
-  await search.fill('Magic Apple');
-  const card = page.locator('[class*="game-card"]', { hasText: 'Magic Apple' }).first();
-  await card.waitFor({ state: 'visible' });
-  await card.locator('img[src*="heart"]').click();
+  await page.goto('/games?search=Magic%20Apple');
+  const card = page.getByRole('button', { name: /Magic Apple/ }).first();
+  await card.waitFor();
+  await card.locator('img[src*="heart-unfilled"]').click();
   await expect(card.locator('img[src*="heart-filled"]').first()).toBeVisible();
 
   // verify in favourites
   await page.goto('/games/favorite');
-  const favCard = page.locator('[class*="game-card"]', { hasText: 'Magic Apple' });
-  await favCard.waitFor({ state: 'visible' });
+  const favCard = page.getByRole('button', { name: /Magic Apple/ }).first();
+  await favCard.waitFor();
 
   // remove from favourites
   await favCard.locator('img[src*="heart-filled"]').click();
