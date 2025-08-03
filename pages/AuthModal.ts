@@ -59,10 +59,17 @@ export class AuthModal {
                 return this.emailInput.isVisible();
         }
 
-        async close() {
-                await this.closeButton.click();
-                await expect(this.dialog).toBeHidden();
-        }
+       async close() {
+               if (await this.dialog.isVisible()) {
+                       try {
+                               await this.closeButton.waitFor({ state: 'visible', timeout: 5000 });
+                               await this.closeButton.click();
+                       } catch {
+                               // Auth modal may already be closed
+                       }
+                       await expect(this.dialog).toBeHidden();
+               }
+       }
 
 	async login(email: string, password: string) {
 		await this.waitForVisible();
@@ -177,14 +184,25 @@ export class AuthModal {
 
        async closeSmsConfirmationIfVisible() {
                const dialogs = this.page.locator('div[role="dialog"]');
-               const smsDialog = dialogs.last();
-               const closeButton = smsDialog.locator('img[src*="close-dialog"]');
                try {
-                       await closeButton.waitFor({ state: 'visible', timeout: 5000 });
+                       await expect(dialogs).toHaveCount(2, { timeout: 10000 });
+                       const smsDialog = dialogs.nth(1);
+                       const closeButton = smsDialog.locator('img[src*="close-dialog"]');
                        await closeButton.click();
                        await expect(smsDialog).toBeHidden();
                } catch {
                        // SMS confirmation did not appear
+               }
+
+               try {
+                       const mainDialog = dialogs.first();
+                       if (await mainDialog.isVisible()) {
+                               const mainClose = mainDialog.locator('img[src*="close-dialog"]');
+                               await mainClose.click({ timeout: 5000 });
+                               await expect(mainDialog).toBeHidden();
+                       }
+               } catch {
+                       // main auth modal already closed
                }
        }
 }
