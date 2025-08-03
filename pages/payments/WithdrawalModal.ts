@@ -1,0 +1,63 @@
+import { Page, Locator, expect } from '@playwright/test';
+
+export class WithdrawalModal {
+  readonly page: Page;
+  readonly dialog: Locator;
+  readonly closeButton: Locator;
+  readonly currencyButton: Locator;
+  readonly depositTab: Locator;
+  readonly withdrawTab: Locator;
+  readonly historyTab: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.dialog = page.locator('div[role="dialog"]');
+    this.closeButton = this.dialog.locator('img[src*="close-dialog"]');
+    this.currencyButton = this.dialog.locator('.currency-select__control');
+    this.depositTab = this.dialog.getByRole('button', { name: 'Депозит' });
+    this.withdrawTab = this.dialog.getByRole('button', { name: 'Вывод' });
+    this.historyTab = this.dialog.getByRole('button', { name: 'История' });
+  }
+
+  async waitForVisible() {
+    await expect(this.dialog).toBeVisible();
+  }
+
+  async close() {
+    await this.closeButton.click();
+    await expect(this.dialog).toBeHidden();
+  }
+
+  async selectCurrency(code: string) {
+    await this.currencyButton.click();
+    await this.page.locator(`.currency-select__option img[src*="/${code}.png"]`).first().click();
+  }
+
+  async waitForPaymentMethods(expected: string[]) {
+    await expect(
+      this.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18')
+    ).toHaveText(expected);
+  }
+
+  async openPaymentMethod(name: string) {
+    await this.dialog.locator('div.sc-90dc3735-3').locator(`text="${name}"`).first().click();
+    await this.dialog.getByText('Назад').waitFor();
+  }
+
+  async goBack() {
+    await this.dialog.getByText('Назад').click();
+    await this.dialog.getByText('Назад').waitFor({ state: 'hidden' });
+  }
+
+  get amountInput() {
+    return this.dialog.locator('input[name="amount"]');
+  }
+
+  async setAmount(value: number) {
+    await this.amountInput.fill(String(value));
+  }
+
+  get withdrawButton() {
+    return this.dialog.getByRole('button', { name: /Вывод/ });
+  }
+}
