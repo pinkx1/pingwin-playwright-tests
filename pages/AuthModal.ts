@@ -71,16 +71,28 @@ export class AuthModal {
                }
        }
 
-	async login(email: string, password: string) {
-		await this.waitForVisible();
-		await this.switchToLogin();
+        async login(email: string, password: string) {
+                await this.waitForVisible();
+                await this.switchToLogin();
 
-		await this.emailInput.fill(email);
-		await this.passwordInput.fill(password);
+                await this.emailInput.fill(email);
+                await this.passwordInput.fill(password);
 
-		await expect(this.submitButton).toBeEnabled();
-		await this.submitButton.click();
-	}
+                await expect(this.submitButton).toBeEnabled();
+                await this.submitButton.click();
+        }
+
+       async loginByPhone(phone: string, password: string) {
+               await this.waitForVisible();
+               await this.switchToLogin();
+               await this.switchToPhone();
+
+               await this.phoneInput.fill(phone);
+               await this.passwordInput.fill(password);
+
+               await expect(this.submitButton).toBeEnabled();
+               await this.submitButton.click();
+       }
 
         async register(email: string, password: string) {
                 await this.waitForVisible();
