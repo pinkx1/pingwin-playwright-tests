@@ -1,28 +1,24 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../fixtures';
 import { MainPage } from '../../pages/MainPage';
-import { AuthModal } from '../../pages/AuthModal';
 import { DepositModal } from '../../pages/payments/DepositModal';
-import { validUser } from '../../fixtures/userData';
 import { depositMethods, minDeposit } from '../../fixtures/depositData';
 
 const cryptoMethods = ['Tether USD (Tron)', 'Tether USD (Ethereum)', 'Bitcoin', 'Ethereum', 'Tron', 'Toncoin'];
 
 test.describe('Deposit feature', () => {
-  test.beforeEach(async ({ page }) => {
+  // Перед каждым тестом открываем страницу депозита на уже авторизованном пользователе
+  test.beforeEach(async ({ authenticatedPage: page }) => {
     const mainPage = new MainPage(page);
-    const authModal = new AuthModal(page);
     await mainPage.open();
-    await mainPage.openLoginModal();
-    await authModal.login(validUser.email, validUser.password);
     await mainPage.openDepositModal();
   });
 
-  test('deposit modal is visible', async ({ page }) => {
+  test('deposit modal is visible', async ({ authenticatedPage: page }) => {
     const modal = new DepositModal(page);
     await modal.waitForVisible();
   });
 
-  test('payment methods correspond to currency', async ({ page }) => {
+  test('payment methods correspond to currency', async ({ authenticatedPage: page }) => {
     const modal = new DepositModal(page);
     for (const [currency, methods] of Object.entries(depositMethods)) {
       await modal.selectCurrency(currency);
@@ -30,7 +26,7 @@ test.describe('Deposit feature', () => {
     }
   });
 
-  test('minimal deposit amounts are correct', async ({ page }) => {
+  test('minimal deposit amounts are correct', async ({ authenticatedPage: page }) => {
     test.setTimeout(120_000); // Increase timeout for this test due to multiple interactions
     const modal = new DepositModal(page);
     for (const [currency, methods] of Object.entries(minDeposit)) {
