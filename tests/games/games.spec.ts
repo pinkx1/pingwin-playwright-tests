@@ -19,6 +19,7 @@ test.beforeEach(async ({ page }) => {
 test('loads and validates game catalog', async ({ page }) => {
   await page.goto('/games');
   await expect(page).toHaveURL(/\/games/);
+  await page.waitForLoadState('networkidle');
 
   const categories = [
     'Популярные',
@@ -32,10 +33,12 @@ test('loads and validates game catalog', async ({ page }) => {
   ];
 
   for (const category of categories) {
-    const section = page.locator('section:has(h2:has-text("' + category + '"))');
-    await expect(section, `Section with heading ${category} should be visible`).toBeVisible();
+    const heading = page.getByRole('heading', { name: category, exact: true });
+    await heading.scrollIntoViewIfNeeded();
+    await expect(heading, `Heading ${category} should be visible`).toBeVisible();
 
-    const cards = section.locator('a[href][class*="game-card"]');
+    const section = heading.locator('xpath=..');
+    const cards = section.locator('a.game-card');
     await expect(cards, `Category ${category} should have 12 cards`).toHaveCount(12);
 
     const count = await cards.count();
