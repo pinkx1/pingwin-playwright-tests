@@ -1,20 +1,11 @@
-import { test, expect } from '@playwright/test';
-import { MainPage } from '../../pages/MainPage';
-import { AuthModal } from '../../pages/AuthModal';
-import { validUser } from '../../fixtures/userData';
+import { test, expect } from '../../fixtures';
 
-test.beforeEach(async ({ page }) => {
-  const mainPage = new MainPage(page);
-  const authModal = new AuthModal(page);
-  await mainPage.open();
-  await mainPage.openLoginModal();
-  await authModal.login(validUser.email, validUser.password);
-  await authModal.dialog.waitFor({ state: 'hidden' });
-});
+// Все тесты в этом файле используют authenticatedPage,
+// поэтому логин выполняется один раз в beforeAll фикстуры.
 
 // Tests for Games page
 
-test('каталог игр отображает все категории и карточки', async ({ page }) => {
+test('каталог игр отображает все категории и карточки', async ({ authenticatedPage: page }) => {
   await page.goto('/games');
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(1000); // на всякий случай, если lazy load
@@ -67,7 +58,7 @@ test('каталог игр отображает все категории и к
 });
 
 
-test('поиск текста категорий игр', async ({ page }) => {
+test('поиск текста категорий игр', async ({ authenticatedPage: page }) => {
   await page.goto('/games');
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(1000);
@@ -105,7 +96,7 @@ test('поиск текста категорий игр', async ({ page }) => {
 
 
 
-test('search and filters work', async ({ page }) => {
+test('search and filters work', async ({ authenticatedPage: page }) => {
   await page.goto('/games');
   const search = page.getByPlaceholder('Найди свою игру');
 
@@ -150,7 +141,7 @@ const launchGames = [
 ];
 
 for (const game of launchGames) {
-  test(`${game} launches and matches screenshot`, async ({ page }) => {
+  test(`${game} launches and matches screenshot`, async ({ authenticatedPage: page }) => {
     const query = encodeURIComponent(game);
     await page.goto(`/games?search=${query}`);
     const cardButton = page
