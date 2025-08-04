@@ -66,78 +66,82 @@ test('каталог игр отображает все категории и к
   }
 });
 
-
-test('поиск текста категорий игр', async ({ page }) => {
-  await page.goto('/games');
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(1000);
-
-  const categories = [
-    'Популярные',
-    'Новые',
-    'Эксклюзив',
-    'Hold & Win',
-    'Книги',
-    'Фрукты',
-    'Megaways',
-    'Джекпот'
-  ];
-
-  for (const cat of categories) {
-    const el = page.getByText(cat, { exact: true });
-    const count = await el.count();
-    console.log(`🔍 "${cat}" найдено: ${count}`);
-
-    if (count > 0) {
-      const tag = await el.first().evaluate(node => node.tagName);
-      const className = await el.first().getAttribute('class');
-      const outer = await el.first().evaluate(node => node.outerHTML.slice(0, 300));
-      console.log(`⮕ tag=${tag}, class=${className}\n⮑ outerHTML: ${outer}`);
-    } else {
-      console.log(`⚠️ "${cat}" не найден вообще!`);
-    }
-  }
-
-  await page.pause(); // сможешь глазами всё посмотреть
-});
-
-
-
-
-
 test('search and filters work', async ({ page }) => {
   await page.goto('/games');
+
   const search = page.getByPlaceholder('Найди свою игру');
+  await expect(search, 'Поле поиска не найдено').toBeVisible();
 
-  // search by name
+  // 🔎 Поиск по названию
   await search.fill('book');
-  await page.goto('/games?search=book');
-  const bookCard = page.getByRole('button', { name: /book/i }).first();
-  await bookCard.waitFor();
-  await expect(page.getByRole('button', { name: /Magic Apple/i })).toHaveCount(0);
+  await page.keyboard.press('Enter');
+  await page.waitForURL(/search=book/, { timeout: 5000 });
 
-  // reset search
+  const bookCard = page.getByRole('button').filter({ hasText: /book/i }).first();
+  await expect(bookCard, 'Игра с названием "book" не найдена после поиска').toBeVisible();
+
+  await expect(
+    page.getByRole('button').filter({ hasText: /^Magic Apple$/ })
+  ).toHaveCount(0);
+
+  // 🔄 Сброс поиска
   await page.goto('/games');
-  await page.getByRole('button', { name: /Magic Apple/i }).first().waitFor();
+  const magicApples = page.getByRole('button').filter({ hasText: /Magic Apple/i });
+  const count = await magicApples.count();
+  expect(count, 'Ожидалось хотя бы одно совпадение с "Magic Apple"').toBeGreaterThan(0);
 
-  // category filter
-  await page.getByRole('combobox', { name: 'Фильтр' }).click();
-  await page.getByRole('option', { name: /Книги/ }).click();
-  const bookFiltered = page.getByRole('button', { name: /book/i }).first();
-  await bookFiltered.waitFor();
-  await expect(page.getByRole('button', { name: /Magic Apple/i })).toHaveCount(0);
 
-  // reset by reloading
+
+
+  // 🗂️ Фильтр по категории
+  const categoryFilter = page.locator('div.react-select__single-value', { hasText: 'Фильтр' });
+  await expect(categoryFilter, 'Фильтр по категориям не найден').toBeVisible();
+  await categoryFilter.click();
+
+
+  const booksOption = page.locator('[role="option"]').filter({ hasText: 'Книги' }).first();
+  await expect(booksOption, 'Опция "Книги" в фильтре не найдена').toBeVisible();
+  await booksOption.click();
+
+  const filteredBook = page.getByRole('button').filter({ hasText: /book/i }).first();
+  await expect(filteredBook, 'Игра "book" не найдена после фильтрации по категории').toBeVisible();
+  await expect(
+    page.getByRole('button').filter({ hasText: /Magic Apple/i })
+  ).toHaveCount(0);
+
+  // 🔄 Сброс фильтрации
   await page.goto('/games');
-  await page.getByRole('button', { name: /Magic Apple/i }).first().waitFor();
+  const resetMagicApples = page.getByRole('button').filter({ hasText: /Magic Apple/i });
+  const resetCount = await resetMagicApples.count();
+  expect(resetCount, 'Ожидалось хотя бы одно совпадение с "Magic Apple" после сброса фильтра').toBeGreaterThan(0);
 
-  // provider filter
-  await page.getByRole('combobox', { name: 'Провайдеры' }).click();
-  await page.getByRole('option', { name: /Playson/ }).click();
-  const playsonGame = page.getByRole('button', { name: /Hot Coins/i }).first();
-  await playsonGame.waitFor();
-  await expect(page.getByRole('button', { name: /Magic Apple/i })).toHaveCount(0);
+
+
+
+  // 🧪 Фильтр по провайдеру
+  // 🧪 Фильтр по провайдеру
+  const providerFilter = page.locator('div.react-select__single-value', { hasText: 'Провайдеры' });
+  await expect(providerFilter, 'Фильтр по провайдерам не найден').toBeVisible();
+  await providerFilter.click();
+
+  const playsonOption = page.locator('div[role="option"]', { hasText: 'Playson' }).first();
+  await expect(playsonOption, 'Опция "Playson" в фильтре не найдена').toBeVisible();
+  await playsonOption.click();
+
+  // ⏳ Ожидаем загрузку результатов фильтрации
+  await page.waitForLoadState('networkidle');
+
+  const playsonGame = page.getByRole('button').filter({ hasText: /Hot Coins/i }).first();
+  await expect(playsonGame, 'Игра Playson не найдена после фильтрации по провайдеру').toBeVisible();
+
+  const filteredOut = page.getByRole('button').filter({ hasText: /Magic Apple/i });
+  const filteredCount = await filteredOut.count();
+  expect(filteredCount, 'Ожидалось, что Magic Apple не попадёт в результат фильтрации по провайдеру').toBe(0);
+
+
 });
+
+
 
 // Launch games and visual comparison
 const launchGames = [
@@ -153,19 +157,32 @@ for (const game of launchGames) {
   test(`${game} launches and matches screenshot`, async ({ page }) => {
     const query = encodeURIComponent(game);
     await page.goto(`/games?search=${query}`);
+
     const cardButton = page
       .getByRole('button', { name: new RegExp(game, 'i') })
       .first();
-    await cardButton.waitFor();
+    await expect(cardButton, `Карточка игры ${game} не найдена`).toBeVisible();
     await cardButton.hover();
+
     const playLink = cardButton.locator('a[href$="/play"]');
-    await playLink.waitFor({ state: 'visible' });
+    await expect(playLink, `Кнопка запуска для ${game} не найдена`).toBeVisible();
+
     await Promise.all([
       page.waitForURL(/\/play/),
       playLink.click(),
     ]);
+
+    // ⏳ Ждём iframe с игрой
+    const iframe = page.locator('iframe.game-iframe');
+    await expect(iframe, `iframe для игры ${game} не найден`).toBeVisible();
+
+    // 💤 Даем чуть больше времени на прогрузку самой игры внутри iframe
+    await page.waitForTimeout(5000);
+
     const slug = game.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    console.log('📸 Сохраняем скриншот', slug);
     await expect(page).toHaveScreenshot(`${slug}.png`, { maxDiffPixels: 100 });
   });
 }
+
 
