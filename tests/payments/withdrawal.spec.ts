@@ -38,33 +38,37 @@ test.describe('Withdrawal feature', () => {
             await modal.openPaymentMethod(method);
             if (min > 0) {
               await modal.setAmount(min - 1);
+              const actualBelow = await modal.amountInput.inputValue();
               await expect(
                 modal.amountInput,
-                `${currency} ${method}: amount below min should be rejected`,
+                `${currency} ${method}: entered ${actualBelow} but min is ${min} – expected invalid`,
               ).toHaveClass(/eTDIAg/);
               await expect(
                 modal.amountInput,
-                `${currency} ${method}: amount below min should be red`,
+                `${currency} ${method}: entered ${actualBelow} but min is ${min} – expected red color`,
               ).toHaveCSS('color', 'rgb(218, 68, 68)');
             }
             await modal.setAmount(min);
+            const actualMin = await modal.amountInput.inputValue();
             await expect(
               modal.amountInput,
-              `${currency} ${method}: min amount should be accepted`,
+              `${currency} ${method}: entered ${actualMin} (min ${min}) – expected accepted`,
             ).toHaveClass(/jBHWnj/);
             await modal.setAmount(max);
+            const actualMax = await modal.amountInput.inputValue();
             await expect(
               modal.amountInput,
-              `${currency} ${method}: max amount should be accepted`,
+              `${currency} ${method}: entered ${actualMax} (max ${max}) – expected accepted`,
             ).toHaveClass(/jBHWnj/);
             await modal.setAmount(max + 1);
+            const actualAbove = await modal.amountInput.inputValue();
             await expect(
               modal.amountInput,
-              `${currency} ${method}: amount above max should be rejected`,
+              `${currency} ${method}: entered ${actualAbove} > max ${max} – expected invalid`,
             ).toHaveClass(/eTDIAg/);
             await expect(
               modal.amountInput,
-              `${currency} ${method}: amount above max should be red`,
+              `${currency} ${method}: entered ${actualAbove} > max ${max} – expected red color`,
             ).toHaveCSS('color', 'rgb(218, 68, 68)');
             await modal.goBack();
             await modal.waitForPaymentMethods(withdrawalMethods[currency], currency);
