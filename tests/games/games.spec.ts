@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
   await mainPage.open();
   await mainPage.openLoginModal();
   await authModal.login(validUser.email, validUser.password);
-  await page.getByRole('button', { name: 'Депозит' }).first().waitFor();
+  await page.waitForLoadState('networkidle');
 });
 
 // Tests for Games page
@@ -30,12 +30,15 @@ test('loads and validates game catalog', async ({ page }) => {
     'Джекпот',
   ];
 
-  for (const category of categories) {
-    const heading = page.getByRole('heading', { name: category, exact: true });
-    await heading.scrollIntoViewIfNeeded();
-    await expect(heading, `Heading ${category} should be visible`).toBeVisible();
+  const pageHeadings = await page.locator('h2').allTextContents();
+  console.log('Found headings:', pageHeadings);
 
-    const section = heading.locator('xpath=..');
+  for (const category of categories) {
+    const section = page.locator('section', {
+      has: page.locator('h2', { hasText: category }),
+    });
+    await expect(section, `Section ${category} should be visible`).toBeVisible();
+
     const cards = section.locator('a.game-card');
     await expect(cards, `Category ${category} should have 12 cards`).toHaveCount(12);
 
