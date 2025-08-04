@@ -28,14 +28,20 @@ export class WithdrawalModal {
     await this.page.locator(`.currency-select__option img[src*="/${code}.png"]`).first().click();
   }
 
-  async waitForPaymentMethods(expected: string[]) {
+  async waitForPaymentMethods(expected: string[], currency: string) {
     await expect(
-      this.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18')
+      this.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18'),
+      `Unexpected payment methods for currency ${currency}`,
     ).toHaveText(expected);
   }
 
   async openPaymentMethod(name: string) {
-    await this.dialog.locator('div.sc-90dc3735-3').locator(`text="${name}"`).first().click();
+    const method = this.dialog
+      .locator('div.sc-90dc3735-3')
+      .locator(`text="${name}"`) // select the payment method by name
+      .first();
+    await expect(method, `Payment method ${name} not found`).toBeVisible();
+    await method.click();
     await this.dialog.getByText('Назад').waitFor();
   }
 
