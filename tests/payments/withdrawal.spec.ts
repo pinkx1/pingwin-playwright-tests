@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures';
 import { MainPage } from '../../pages/MainPage';
 import { WithdrawalModal } from '../../pages/payments/WithdrawalModal';
-import { withdrawalMethods } from '../../fixtures/withdrawalData';
+import { withdrawalMethods, withdrawalLimits } from '../../fixtures/withdrawalData';
 
 test.describe('Withdrawal feature', () => {
   // Перед каждым тестом открываем вкладку вывода средств в уже авторизованной сессии
@@ -26,18 +26,29 @@ test.describe('Withdrawal feature', () => {
     }
   });
 
-  test.skip('withdrawal amount validation', async ({ authenticatedPage: page }) => {
-    // Example placeholder for boundary tests
+  test('withdrawal amount validation', async ({ authenticatedPage: page }) => {
+    test.setTimeout(180_000);
     const modal = new WithdrawalModal(page);
-    await modal.selectCurrency('USD');
-    await modal.openPaymentMethod('Выплата на Binance BinPay');
-    await modal.setAmount(4); // below minimum
-    await expect(modal.withdrawButton).toBeDisabled();
-    await modal.setAmount(5); // minimum
-    await expect(modal.withdrawButton).toBeEnabled();
-    await modal.setAmount(10); // maximum
-    await expect(modal.withdrawButton).toBeEnabled();
-    await modal.setAmount(11); // above maximum
-    await expect(modal.withdrawButton).toBeDisabled();
+    for (const [currency, limits] of Object.entries(withdrawalLimits)) {
+      await modal.selectCurrency(currency);
+      await modal.waitForPaymentMethods(withdrawalMethods[currency]);
+      for (const [method, { min, max }] of Object.entries(limits)) {
+        await modal.openPaymentMethod(method);
+        if (min > 0) {
+          await modal.setAmount(min - 1);
+          await expect(modal.amountInput).toHaveClass(/eTDIAg/);
+          await expect(modal.amountInput).toHaveCSS('color', 'rgb(218, 68, 68)');
+        }
+        await modal.setAmount(min);
+        await expect(modal.amountInput).toHaveClass(/jBHWnj/);
+        await modal.setAmount(max);
+        await expect(modal.amountInput).toHaveClass(/jBHWnj/);
+        await modal.setAmount(max + 1);
+        await expect(modal.amountInput).toHaveClass(/eTDIAg/);
+        await expect(modal.amountInput).toHaveCSS('color', 'rgb(218, 68, 68)');
+        await modal.goBack();
+        await modal.waitForPaymentMethods(withdrawalMethods[currency]);
+      }
+    }
   });
 });
