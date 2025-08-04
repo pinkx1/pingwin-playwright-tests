@@ -18,7 +18,22 @@ export class MainPage {
         }
 
         async openDepositModal() {
-                await this.page.getByRole('button', { name: 'Депозит' }).first().click();
+                const depositButton = this.page.locator('button:has-text("Депозит")').first();
+                if (await depositButton.isVisible()) {
+                        await depositButton.click();
+                } else {
+                        const dollarButton = this.page.locator('button:has-text("$")').first();
+                        if (await dollarButton.isVisible()) {
+                                await dollarButton.click();
+                        } else {
+                                const walletIcon = this.page.locator('img[src="/images/icons/wallet-balance.svg"]').first();
+                                if (await walletIcon.isVisible()) {
+                                        await walletIcon.click();
+                                } else {
+                                        throw new Error('Deposit control not found');
+                                }
+                        }
+                }
                 await this.page.getByRole('dialog').waitFor({ state: 'visible' });
         }
 }
