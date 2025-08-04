@@ -1,7 +1,7 @@
 import { test, expect } from '../../withdrawalFixtures';
 import { MainPage } from '../../pages/MainPage';
 import { WithdrawalModal } from '../../pages/payments/WithdrawalModal';
-import { withdrawalMethods, withdrawalLimits } from '../../fixtures/withdrawalData';
+import { withdrawalMethods } from '../../fixtures/withdrawalData';
 
 test.describe('Withdrawal feature', () => {
   // Перед каждым тестом открываем вкладку вывода средств в уже авторизованной сессии
@@ -29,13 +29,15 @@ test.describe('Withdrawal feature', () => {
   test('withdrawal amount validation', async ({ authenticatedPage: page }) => {
     test.setTimeout(180_000);
     const modal = new WithdrawalModal(page);
-    for (const [currency, limits] of Object.entries(withdrawalLimits)) {
+    for (const [currency, methods] of Object.entries(withdrawalMethods)) {
       await test.step(`Currency: ${currency}`, async () => {
         await modal.selectCurrency(currency);
-        await modal.waitForPaymentMethods(withdrawalMethods[currency], currency);
-        for (const [method, { min, max }] of Object.entries(limits)) {
+        await modal.waitForPaymentMethods(methods, currency);
+        for (const method of methods) {
           await test.step(`Method: ${method}`, async () => {
             await modal.openPaymentMethod(method);
+            const min = await modal.getMinLimit();
+            const max = await modal.getMaxLimit();
             if (min > 0) {
               await modal.setAmount(min - 1);
               const actualBelow = await modal.amountInput.inputValue();
@@ -71,7 +73,7 @@ test.describe('Withdrawal feature', () => {
               `${currency} ${method}: entered ${actualAbove} > max ${max} – expected red color`,
             ).toHaveCSS('color', 'rgb(218, 68, 68)');
             await modal.goBack();
-            await modal.waitForPaymentMethods(withdrawalMethods[currency], currency);
+            await modal.waitForPaymentMethods(methods, currency);
           });
         }
       });

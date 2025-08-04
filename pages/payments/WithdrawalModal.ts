@@ -61,4 +61,24 @@ export class WithdrawalModal {
   async setAmount(value: number) {
     await this.amountInput.fill(String(value));
   }
+
+  private parseAmount(text: string): number {
+    return parseInt(text.replace(/[^0-9]/g, ''), 10);
+  }
+
+  async getMinLimit(): Promise<number> {
+    const text = await this.dialog
+      .getByText('Минимальная сумма вывода:')
+      .locator('xpath=../div[2]')
+      .innerText();
+    return this.parseAmount(text);
+  }
+
+  async getMaxLimit(): Promise<number> {
+    const text = await this.dialog
+      .getByText('Макс.')
+      .locator('xpath=../div[1]')
+      .innerText();
+    return this.parseAmount(text);
+  }
 }

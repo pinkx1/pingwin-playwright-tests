@@ -17,23 +17,23 @@ export class MainPage {
                 await this.page.getByRole('dialog').waitFor({ state: 'visible' });
         }
 
-        async openDepositModal() {
-                const depositButton = this.page.locator('button:has-text("Депозит")').first();
-                if (await depositButton.isVisible()) {
-                        await depositButton.click();
-                } else {
-                        const dollarButton = this.page.locator('button:has-text("$")').first();
-                        if (await dollarButton.isVisible()) {
-                                await dollarButton.click();
-                        } else {
-                                const walletIcon = this.page.locator('img[src="/images/icons/wallet-balance.svg"]').first();
-                                if (await walletIcon.isVisible()) {
-                                        await walletIcon.click();
-                                } else {
-                                        throw new Error('Deposit control not found');
-                                }
+       async openDepositModal() {
+                const candidates = [
+                        this.page.getByRole('button', { name: 'Депозит' }),
+                        this.page.locator('button:has-text("$")'),
+                        this.page.locator('img[src="/images/icons/wallet-balance.svg"]'),
+                ];
+
+                for (const locator of candidates) {
+                        try {
+                                await locator.first().click({ timeout: 5000 });
+                                await this.page.getByRole('dialog').waitFor({ state: 'visible' });
+                                return;
+                        } catch {
+                                // try next locator
                         }
                 }
-                await this.page.getByRole('dialog').waitFor({ state: 'visible' });
-        }
+
+                throw new Error('Deposit control not found');
+       }
 }
