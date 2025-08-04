@@ -16,12 +16,39 @@ test.beforeEach(async ({ page }) => {
 
 // Tests for Games page
 
-test('loads and displays game list with images', async ({ page }) => {
+test('loads and validates game catalog', async ({ page }) => {
   await page.goto('/games');
   await expect(page).toHaveURL(/\/games/);
-  const firstCard = page.locator('[class*="game-card"]').first();
-  await firstCard.waitFor({ state: 'visible' });
-  await expect(firstCard.locator('img').first()).toBeVisible();
+
+  const categories = [
+    'Популярные',
+    'Новые',
+    'Эксклюзив',
+    'Hold & Win',
+    'Книги',
+    'Фрукты',
+    'Megaways',
+    'Джекпот',
+  ];
+
+  for (const category of categories) {
+    const section = page.locator('section:has(h2:has-text("' + category + '"))');
+    await expect(section, `Section with heading ${category} should be visible`).toBeVisible();
+
+    const cards = section.locator('a[href][class*="game-card"]');
+    await expect(cards, `Category ${category} should have 12 cards`).toHaveCount(12);
+
+    const count = await cards.count();
+    for (let i = 0; i < count; i++) {
+      const card = cards.nth(i);
+      const href = await card.getAttribute('href');
+      expect(href, `Card href should lead to game play page`).toMatch(/\/ru\/games\/.*\/play$/);
+      await expect(card.locator('img'), 'Card should have an image').toBeVisible();
+      const alt = await card.locator('img').getAttribute('alt');
+      const text = (await card.textContent())?.trim();
+      expect(alt?.trim() || text, 'Card should have a game name').toBeTruthy();
+    }
+  }
 });
 
 test('search and filters work', async ({ page }) => {
