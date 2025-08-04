@@ -22,7 +22,7 @@ test.describe('Withdrawal feature', () => {
     const modal = new WithdrawalModal(page);
     for (const [currency, methods] of Object.entries(withdrawalMethods)) {
       await modal.selectCurrency(currency);
-      await modal.waitForPaymentMethods(methods);
+      await modal.waitForPaymentMethods(methods, currency);
     }
   });
 
@@ -32,7 +32,7 @@ test.describe('Withdrawal feature', () => {
     for (const [currency, limits] of Object.entries(withdrawalLimits)) {
       await test.step(`Currency: ${currency}`, async () => {
         await modal.selectCurrency(currency);
-        await modal.waitForPaymentMethods(withdrawalMethods[currency]);
+        await modal.waitForPaymentMethods(withdrawalMethods[currency], currency);
         for (const [method, { min, max }] of Object.entries(limits)) {
           await test.step(`Method: ${method}`, async () => {
             await modal.openPaymentMethod(method);
@@ -67,7 +67,7 @@ test.describe('Withdrawal feature', () => {
               `${currency} ${method}: amount above max should be red`,
             ).toHaveCSS('color', 'rgb(218, 68, 68)');
             await modal.goBack();
-            await modal.waitForPaymentMethods(withdrawalMethods[currency]);
+            await modal.waitForPaymentMethods(withdrawalMethods[currency], currency);
           });
         }
       });
