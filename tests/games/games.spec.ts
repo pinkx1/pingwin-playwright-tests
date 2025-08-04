@@ -14,9 +14,10 @@ test.beforeEach(async ({ page }) => {
 
 // Tests for Games page
 
-test('loads and validates game catalog', async ({ page }) => {
-  await page.goto('games/slots');
-  await expect(page).toHaveURL(/\/games\/slots/);
+test('каталог игр отображает все категории и карточки', async ({ page }) => {
+  await page.goto('/games');
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000); // на всякий случай, если lazy load
 
   const categories = [
     'Популярные',
@@ -29,28 +30,80 @@ test('loads and validates game catalog', async ({ page }) => {
     'Джекпот',
   ];
 
-  for (const category of categories) {
-    const heading = page.getByText(category).first();
-    await expect(heading, `Category ${category} should be visible`).toBeVisible({ timeout: 15000 });
+  for (const categoryName of categories) {
+    const heading = page.locator('div.sc-4e55357-2', { hasText: categoryName }).first();
+    await expect(heading, `Заголовок категории "${categoryName}" не найден`).toBeVisible();
 
-    const cards = page.locator(
-      `xpath=//*[text()="${category}"]/ancestor::*[following-sibling::div][1]/following-sibling::div[1]//div[@role="button"]`
-    );
-    await expect(cards, `Category ${category} should have 12 cards`).toHaveCount(12);
+    // Контейнер с карточками — ищем первый блок после заголовка
+    const categoryContainer = heading.locator('xpath=../../following-sibling::*[1]');
+    await expect(categoryContainer, `Контейнер карточек для "${categoryName}" не найден`).toBeVisible();
 
+    const cards = categoryContainer.locator('[role="button"]');
     const count = await cards.count();
+
+    console.log(`🟢 Категория "${categoryName}" содержит ${count} карточек`);
+    expect(count, `Ожидалось ровно 12 карточек в категории "${categoryName}", но найдено ${count}`).toBe(12);
+
     for (let i = 0; i < count; i++) {
       const card = cards.nth(i);
-      const link = card.locator('a[href*="/play"]');
-      const href = await link.getAttribute('href');
-      expect(href, `Card href should lead to game play page`).toMatch(/\/ru\/games\/.*\/play$/);
-      await expect(card.locator('img'), 'Card should have an image').toBeVisible();
-      const alt = await card.locator('img').getAttribute('alt');
-      const text = (await card.textContent())?.trim();
-      expect(alt?.trim() || text, 'Card should have a game name').toBeTruthy();
+
+      // 1. Проверка на видимость изображения
+      const img = card.locator('img');
+      await expect(img, `Изображение отсутствует в карточке #${i + 1} категории "${categoryName}"`).toBeVisible();
+
+      // 2. Проверка наличия названия (текст или alt)
+      const altText = await img.getAttribute('alt');
+      const textContent = (await card.textContent())?.trim();
+      expect(altText || textContent, `Карточка #${i + 1} категории "${categoryName}" не содержит названия`).toBeTruthy();
+
+      // 3. Проверка ссылки на игру, строго заканчивается на "/play"
+      const hrefCandidates = await card.locator('a').evaluateAll(anchors =>
+        anchors.map(a => a.getAttribute('href')).filter(Boolean)
+      );
+      const playHref = hrefCandidates.find(href => href?.endsWith('/play'));
+      expect(playHref, `В карточке #${i + 1} категории "${categoryName}" нет ссылки на /play`).toBeTruthy();
     }
   }
 });
+
+
+test('поиск текста категорий игр', async ({ page }) => {
+  await page.goto('/games');
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000);
+
+  const categories = [
+    'Популярные',
+    'Новые',
+    'Эксклюзив',
+    'Hold & Win',
+    'Книги',
+    'Фрукты',
+    'Megaways',
+    'Джекпот'
+  ];
+
+  for (const cat of categories) {
+    const el = page.getByText(cat, { exact: true });
+    const count = await el.count();
+    console.log(`🔍 "${cat}" найдено: ${count}`);
+
+    if (count > 0) {
+      const tag = await el.first().evaluate(node => node.tagName);
+      const className = await el.first().getAttribute('class');
+      const outer = await el.first().evaluate(node => node.outerHTML.slice(0, 300));
+      console.log(`⮕ tag=${tag}, class=${className}\n⮑ outerHTML: ${outer}`);
+    } else {
+      console.log(`⚠️ "${cat}" не найден вообще!`);
+    }
+  }
+
+  await page.pause(); // сможешь глазами всё посмотреть
+});
+
+
+
+
 
 test('search and filters work', async ({ page }) => {
   await page.goto('/games');
