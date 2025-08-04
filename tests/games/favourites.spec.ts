@@ -1,22 +1,11 @@
-import { test, expect } from '@playwright/test';
-import { MainPage } from '../../pages/MainPage';
-import { AuthModal } from '../../pages/AuthModal';
-import { validUser } from '../../fixtures/userData';
+import { test, expect } from '../../fixtures';
 
-test.beforeEach(async ({ page }) => {
-  const mainPage = new MainPage(page);
-  const authModal = new AuthModal(page);
-  await mainPage.open();
-  await mainPage.openLoginModal();
-  await authModal.login(validUser.email, validUser.password);
-  await authModal.closeSmsConfirmationIfVisible();
-  await authModal.closeEmailConfirmationIfVisible();
-  await page.getByRole('button', { name: 'Депозит' }).first().waitFor();
-});
+// В этом файле используется authenticatedPage из fixtures.ts,
+// поэтому дополнительный логин перед каждым тестом больше не нужен.
 
 // Tests for favourites functionality
 
-test('add and remove game from favourites', async ({ page }) => {
+test('add and remove game from favourites', async ({ authenticatedPage: page }) => {
   // ensure favourites empty
   await page.goto('/games/favorite');
   const emptyState = page.getByText('Мы не нашли таких игр');
