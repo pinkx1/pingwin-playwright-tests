@@ -9,15 +9,14 @@ test.beforeEach(async ({ page }) => {
   await mainPage.open();
   await mainPage.openLoginModal();
   await authModal.login(validUser.email, validUser.password);
-  await page.waitForLoadState('networkidle');
+  await authModal.dialog.waitFor({ state: 'hidden' });
 });
 
 // Tests for Games page
 
 test('loads and validates game catalog', async ({ page }) => {
-  await page.goto('/games');
-  await expect(page).toHaveURL(/\/games/);
-  await page.waitForLoadState('networkidle');
+  await page.goto('games/slots');
+  await expect(page).toHaveURL(/\/games\/slots/);
 
   const categories = [
     'Популярные',
@@ -30,22 +29,20 @@ test('loads and validates game catalog', async ({ page }) => {
     'Джекпот',
   ];
 
-  const pageHeadings = await page.locator('h2').allTextContents();
-  console.log('Found headings:', pageHeadings);
-
   for (const category of categories) {
-    const section = page.locator('section', {
-      has: page.locator('h2', { hasText: category }),
-    });
-    await expect(section, `Section ${category} should be visible`).toBeVisible();
+    const heading = page.getByText(category).first();
+    await expect(heading, `Category ${category} should be visible`).toBeVisible({ timeout: 15000 });
 
-    const cards = section.locator('a.game-card');
+    const cards = page.locator(
+      `xpath=//*[text()="${category}"]/ancestor::*[following-sibling::div][1]/following-sibling::div[1]//div[@role="button"]`
+    );
     await expect(cards, `Category ${category} should have 12 cards`).toHaveCount(12);
 
     const count = await cards.count();
     for (let i = 0; i < count; i++) {
       const card = cards.nth(i);
-      const href = await card.getAttribute('href');
+      const link = card.locator('a[href*="/play"]');
+      const href = await link.getAttribute('href');
       expect(href, `Card href should lead to game play page`).toMatch(/\/ru\/games\/.*\/play$/);
       await expect(card.locator('img'), 'Card should have an image').toBeVisible();
       const alt = await card.locator('img').getAttribute('alt');
