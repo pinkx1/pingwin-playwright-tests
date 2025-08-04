@@ -9,8 +9,6 @@ test.beforeEach(async ({ page }) => {
   await mainPage.open();
   await mainPage.openLoginModal();
   await authModal.login(validUser.email, validUser.password);
-  await authModal.closeSmsConfirmationIfVisible();
-  await authModal.closeEmailConfirmationIfVisible();
   await page.getByRole('button', { name: 'Депозит' }).first().waitFor();
 });
 
