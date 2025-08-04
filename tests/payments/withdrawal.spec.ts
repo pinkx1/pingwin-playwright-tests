@@ -36,18 +36,8 @@ test.describe('Withdrawal feature', () => {
     await modal.setAmount(5); // minimum
     await expect(modal.withdrawButton).toBeEnabled();
     await modal.setAmount(10); // maximum
-    await expect(modал.withdrawButton).toBeEnabled();
+    await expect(modal.withdrawButton).toBeEnabled();
     await modal.setAmount(11); // above maximum
-    await expect(modал.withdrawButton).toBeDisabled();
-  });
-
-  test.skip('redirects to selected payment system', async ({ authenticatedPage: page }) => {
-    // Placeholder for redirect check
-    const modal = new WithdrawalModal(page);
-    await modal.selectCurrency('USD');
-    await modal.openPaymentMethod('Выплата на Binance BinPay');
-    await modal.setAmount(5);
-    await modal.withdrawButton.click();
-    // TODO: Assert that navigation to the payment system occurred
+    await expect(modal.withdrawButton).toBeDisabled();
   });
 });
