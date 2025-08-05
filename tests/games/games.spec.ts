@@ -7,7 +7,7 @@ import { test, expect } from '../../fixtures';
 
 test('каталог игр отображает все категории и карточки', async ({ authenticatedPage: page }) => {
   await page.goto('/games');
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
   await page.waitForTimeout(1000); // на всякий случай, если lazy load
 
   const categories = [
@@ -118,11 +118,8 @@ test('search and filters work', async ({ authenticatedPage: page }) => {
   const playsonOption = page.locator('div[role="option"]', { hasText: 'Playson' }).first();
   await expect(playsonOption, 'Опция "Playson" в фильтре не найдена').toBeVisible();
   await playsonOption.click();
-
-  // ⏳ Ожидаем загрузку результатов фильтрации
-  await page.waitForLoadState('networkidle');
-
   const playsonGame = page.getByRole('button').filter({ hasText: /Hot Coins/i }).first();
+  await playsonGame.waitFor({ state: 'visible' });
   await expect(playsonGame, 'Игра Playson не найдена после фильтрации по провайдеру').toBeVisible();
 
   const filteredOut = page.getByRole('button').filter({ hasText: /Magic Apple/i });
