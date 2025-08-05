@@ -28,15 +28,32 @@ export class WithdrawalModal {
     await this.page.locator(`.currency-select__option img[src*="/${code}.png"]`).first().click();
   }
 
-  async waitForPaymentMethods(expected: string[]) {
+  async waitForPaymentMethods(expected: string[], currency: string) {
     await expect(
-      this.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18')
+      this.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18'),
+      `Unexpected payment methods for currency ${currency}`,
     ).toHaveText(expected);
   }
 
   async openPaymentMethod(name: string) {
-    await this.dialog.locator('div.sc-90dc3735-3').locator(`text="${name}"`).first().click();
-    await this.dialog.getByText('Назад').waitFor();
+    const method = this.dialog
+      .locator('div.sc-90dc3735-3')
+      .locator(`text="${name}"`) // select the payment method by name
+      .first();
+    await expect(method, `Payment method ${name} not found`).toBeVisible();
+    await method.click();
+    const minLimit = this.dialog
+      .getByText('Минимальная сумма вывода:')
+      .locator('xpath=../div[2]');
+    const maxLimit = this.dialog.getByText('Макс.').locator('xpath=../div[1]');
+    await expect(
+      minLimit,
+      `Minimum limit for ${name} did not load`,
+    ).toHaveText(/\d/);
+    await expect(
+      maxLimit,
+      `Maximum limit for ${name} did not load`,
+    ).toHaveText(/\d/);
   }
 
   async goBack() {
@@ -54,5 +71,25 @@ export class WithdrawalModal {
 
   async setAmount(value: number) {
     await this.amountInput.fill(String(value));
+  }
+
+  private parseAmount(text: string): number {
+    return parseInt(text.replace(/[^0-9]/g, ''), 10);
+  }
+
+  async getMinLimit(): Promise<number> {
+    const text = await this.dialog
+      .getByText('Минимальная сумма вывода:')
+      .locator('xpath=../div[2]')
+      .innerText();
+    return this.parseAmount(text);
+  }
+
+  async getMaxLimit(): Promise<number> {
+    const text = await this.dialog
+      .getByText('Макс.')
+      .locator('xpath=../div[1]')
+      .innerText();
+    return this.parseAmount(text);
   }
 }
