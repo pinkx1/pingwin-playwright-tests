@@ -1,11 +1,7 @@
 import { test, expect } from '../../fixtures';
 import { MainPage } from '../../pages/MainPage';
 import { AuthModal } from '../../pages/AuthModal';
-
-function generateAutotestEmail(): string {
-  const prefix = `autotest_${Math.random().toString(36).substring(2, 10)}`;
-  return `${prefix}@gmail.com`;
-}
+import { MailSlurp } from 'mailslurp-client';
 
 test('страница бонусов содержит акции', async ({ authenticatedPage: page }) => {
   await page.goto('/profile/bonuses');
@@ -17,14 +13,37 @@ test('страница бонусов содержит акции', async ({ aut
 test('активация бонуса открывает модалку депозита', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
-  const email = generateAutotestEmail();
+  const mailslurp = new MailSlurp({
+    apiKey: 'fecc6dbfce5284fda12515749ca6915bbe7f2532bd3d22b31c3f719117463573',
+  });
+
+  const inbox = await mailslurp.inboxController.createInboxWithDefaults();
+  const email = inbox.emailAddress as string;
   const password = 'TestPassword123!';
 
   await mainPage.open();
   await mainPage.openRegisterModal();
   await authModal.register(email, password);
-  await authModal.closeEmailConfirmationIfVisible();
-  await authModal.closeSmsConfirmationIfVisible();
+  await authModal.waitForEmailConfirmation();
+
+  const latestEmail = await mailslurp.waitController.waitForLatestEmail({
+    inboxId: inbox.id!,
+    timeout: 60000,
+    unreadOnly: true,
+  });
+  const confirmationLinkMatch = latestEmail.body?.match(/https?:\/\/[^\s]+/);
+  expect(confirmationLinkMatch).not.toBeNull();
+  const confirmationLink = confirmationLinkMatch![0];
+  await page.goto(confirmationLink);
+
+  await mainPage.open();
+  const loginButton = page.getByRole('button', { name: 'Войти' });
+  if (await loginButton.isVisible()) {
+    await mainPage.openLoginModal();
+    await authModal.login(email, password);
+    await authModal.closeSmsConfirmationIfVisible();
+    await authModal.closeEmailConfirmationIfVisible();
+  }
 
   await page.goto('/profile/bonuses');
   const activateButton = page.getByRole('button', { name: 'Активировать' }).first();
