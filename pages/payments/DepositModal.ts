@@ -30,7 +30,24 @@ export class DepositModal {
 
   async selectCurrency(code: string) {
     await this.currencyButton.click();
-    await this.page.locator(`.currency-select__option img[src*="/${code}.png"]`).first().click();
+    await this.page
+      .locator(`.currency-select__option img[src*="/${code}.png"]`)
+      .first()
+      .click();
+  }
+
+  async getCurrencies(): Promise<string[]> {
+    await this.currencyButton.click();
+    const options = this.page.locator('.currency-select__option img');
+    const count = await options.count();
+    const codes: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const src = await options.nth(i).getAttribute('src');
+      const match = src?.match(/\/([A-Z]{3})\.png$/i);
+      if (match) codes.push(match[1]);
+    }
+    await this.currencyButton.click();
+    return codes;
   }
 
   async waitForPaymentMethods(expected: string[]) {
@@ -40,7 +57,9 @@ export class DepositModal {
   }
 
   async getPaymentMethods(): Promise<string[]> {
-    const names = await this.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18').allTextContents();
+    const locator = this.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18');
+    await locator.first().waitFor();
+    const names = await locator.allTextContents();
     return names.map(n => n.trim());
   }
 

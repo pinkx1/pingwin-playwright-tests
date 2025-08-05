@@ -18,36 +18,44 @@ test.describe('Deposit feature', () => {
   });
 
   test('deposit limits are enforced', async ({ authenticatedPage: page }) => {
-    test.setTimeout(120_000); // Increase timeout for this test due to multiple interactions
+    test.setTimeout(180_000);
     const modal = new DepositModal(page);
-    const methods = await modal.getPaymentMethods();
-    for (const method of methods) {
-      if (method === 'Binance Pay' || method.includes(CARD_METHOD_IDENTIFIER)) {
-        await modal.openPaymentMethod(method);
-        const min = await modal.getMinDeposit();
-        let max: number | null = null;
-        try {
-          max = await modal.getMaxDeposit();
-        } catch {
-          // Some methods may not provide a maximum limit
-        }
+    const currencies = await modal.getCurrencies();
+    for (const currency of currencies) {
+      await test.step(`Currency: ${currency}`, async () => {
+        await modal.selectCurrency(currency);
+        const methods = await modal.getPaymentMethods();
+        for (const method of methods) {
+          if (method === 'Binance Pay' || method.includes(CARD_METHOD_IDENTIFIER)) {
+            await test.step(`Method: ${method}`, async () => {
+              await modal.openPaymentMethod(method);
+              const min = await modal.getMinDeposit();
+              let max: number | null = null;
+              try {
+                max = await modal.getMaxDeposit();
+              } catch {
+                // Some methods may not provide a maximum limit
+              }
 
-        if (min > 0) {
-          await modal.setAmount(min - 1);
-          await expect(modal.depositButton).toBeDisabled();
-        }
-        await modal.setAmount(min);
-        await expect(modal.depositButton).toBeEnabled();
+              if (min > 0) {
+                await modal.setAmount(min - 1);
+                await expect(modal.depositButton).toBeDisabled();
+              }
+              await modal.setAmount(min);
+              await expect(modal.depositButton).toBeEnabled();
 
-        if (max !== null) {
-          await modal.setAmount(max);
-          await expect(modal.depositButton).toBeEnabled();
-          await modal.setAmount(max + 1);
-          await expect(modal.depositButton).toBeDisabled();
-        }
+              if (max !== null) {
+                await modal.setAmount(max);
+                await expect(modal.depositButton).toBeEnabled();
+                await modal.setAmount(max + 1);
+                await expect(modal.depositButton).toBeDisabled();
+              }
 
-        await modal.goBack();
-      }
+              await modal.goBack();
+            });
+          }
+        }
+      });
     }
   });
 });
