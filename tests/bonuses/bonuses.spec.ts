@@ -5,7 +5,7 @@ import { MailSlurp } from 'mailslurp-client';
 
 test('страница бонусов содержит акции', async ({ authenticatedPage: page }) => {
   await page.goto('/profile/bonuses');
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
   const bonuses = page.getByRole('button', { name: 'Активировать' });
   await expect(bonuses.first()).toBeVisible();
 });
