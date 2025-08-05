@@ -18,6 +18,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     headless: true,
     ignoreHTTPSErrors: true,
+    screenshot: 'only-on-failure',
 
   },
 
