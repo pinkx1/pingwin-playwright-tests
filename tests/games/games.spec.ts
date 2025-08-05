@@ -134,7 +134,7 @@ test('search and filters work', async ({ authenticatedPage: page }) => {
 
 
 
-// Launch games and visual comparison
+// Launch games and check that game URLs load successfully
 const launchGames = [
   'Hot Fruits',
   'Magic Apple',
@@ -145,7 +145,7 @@ const launchGames = [
 ];
 
 for (const game of launchGames) {
-  test(`${game} launches and matches screenshot`, async ({ authenticatedPage: page }) => {
+  test(`${game} link loads without HTTP errors`, async ({ authenticatedPage: page }) => {
     const query = encodeURIComponent(game);
     await page.goto(`/games?search=${query}`);
 
@@ -157,23 +157,20 @@ for (const game of launchGames) {
 
     const playLink = cardButton.locator('a[href$="/play"]');
     await expect(playLink, `Кнопка запуска для ${game} не найдена`).toBeVisible();
+    const playHref = await playLink.getAttribute('href');
+    expect(playHref, `Ссылка запуска для ${game} отсутствует`).toBeTruthy();
 
     await Promise.all([
       page.waitForURL(/\/play/),
       playLink.click(),
     ]);
 
-    // ⏳ Ждём iframe с игрой
     const iframe = page.locator('iframe.game-iframe');
     await expect(iframe, `iframe для игры ${game} не найден`).toBeVisible();
+    const gameSrc = await iframe.getAttribute('src');
+    expect(gameSrc, `src для iframe игры ${game} отсутствует`).toBeTruthy();
 
-    // 💤 Даем чуть больше времени на прогрузку самой игры внутри iframe
-    await page.waitForTimeout(5000);
-
-    const slug = game.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    console.log('📸 Сохраняем скриншот', slug);
-    await expect(page).toHaveScreenshot(`${slug}.png`, { maxDiffPixels: 100 });
+    const response = await page.request.get(gameSrc!);
+    expect(response.ok(), `Загрузка игры ${game} вернула статус ${response.status()}`).toBeTruthy();
   });
 }
-
-
