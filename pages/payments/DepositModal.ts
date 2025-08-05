@@ -64,7 +64,19 @@ export class DepositModal {
   }
 
   async openPaymentMethod(name: string) {
-    await this.dialog.locator('div.sc-90dc3735-3').locator(`text="${name}"`).first().click();
+    await this.dialog
+      .locator('div.sc-90dc3735-3')
+      .locator(`text="${name}"`)
+      .first()
+      .click();
+    await this.dialog.getByText('Назад').waitFor();
+  }
+
+  async openPaymentMethodByIndex(index: number) {
+    await this.dialog
+      .locator('div.sc-90dc3735-3 div.sc-1d93ec92-18')
+      .nth(index)
+      .click();
     await this.dialog.getByText('Назад').waitFor();
   }
 
