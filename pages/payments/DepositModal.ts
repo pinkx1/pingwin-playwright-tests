@@ -8,6 +8,7 @@ export class DepositModal {
   readonly depositTab: Locator;
   readonly withdrawTab: Locator;
   readonly historyTab: Locator;
+  readonly methodsContainer: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -17,6 +18,7 @@ export class DepositModal {
     this.depositTab = this.dialog.getByRole('button', { name: 'Депозит' });
     this.withdrawTab = this.dialog.getByRole('button', { name: 'Вывод' });
     this.historyTab = this.dialog.getByRole('button', { name: 'История' });
+    this.methodsContainer = this.dialog.locator('div.sc-90dc3735-3');
   }
 
   async waitForVisible() {
@@ -33,19 +35,34 @@ export class DepositModal {
     await this.page.locator(`.currency-select__option img[src*="/${code}.png"]`).first().click();
   }
 
-  async waitForPaymentMethods(expected: string[]) {
-    await expect(
-      this.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18')
-    ).toHaveText(expected);
+  async waitForPaymentMethods(expected?: string[]) {
+    if (expected) {
+      await expect(
+        this.methodsContainer.locator('div.sc-1d93ec92-18')
+      ).toHaveText(expected);
+      return;
+    }
+    await this.methodsContainer.locator('div.sc-1d93ec92-18').first().waitFor();
   }
 
   async getPaymentMethods(): Promise<string[]> {
-    const names = await this.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18').allTextContents();
+    const names = await this.methodsContainer
+      .locator('div.sc-1d93ec92-18')
+      .allTextContents();
     return names.map(n => n.trim());
   }
 
+  paymentMethodRows(search: string): Locator {
+    return this.methodsContainer.locator('> div').filter({ hasText: search });
+  }
+
   async openPaymentMethod(name: string) {
-    await this.dialog.locator('div.sc-90dc3735-3').locator(`text="${name}"`).first().click();
+    await this.methodsContainer.locator(`text="${name}"`).first().click();
+    await this.dialog.getByText('Назад').waitFor();
+  }
+
+  async openPaymentMethodByText(search: string, index = 0) {
+    await this.paymentMethodRows(search).nth(index).click();
     await this.dialog.getByText('Назад').waitFor();
   }
 
@@ -74,6 +91,28 @@ export class DepositModal {
     await altLabel.waitFor();
     const alt = altLabel.locator('..').locator('.sc-1d93ec92-19');
     const text = await alt.first().textContent();
+    return this.parseAmount(text || '');
+  }
+
+  async getMaxDeposit(): Promise<number> {
+    const primaryLabel = this.dialog.getByText('Максимальный депозит');
+    if (await primaryLabel.count()) {
+      await primaryLabel.waitFor();
+      const primary = primaryLabel.locator('..').locator('.sc-1d93ec92-19');
+      const text = await primary.first().textContent();
+      return this.parseAmount(text || '');
+    }
+    const altLabel = this.dialog.getByText('Максимальний депозит');
+    if (await altLabel.count()) {
+      await altLabel.waitFor();
+      const alt = altLabel.locator('..').locator('.sc-1d93ec92-19');
+      const text = await alt.first().textContent();
+      return this.parseAmount(text || '');
+    }
+    const anotherLabel = this.dialog.getByText('Максимальная сумма пополнения');
+    await anotherLabel.waitFor();
+    const another = anotherLabel.locator('..').locator('.sc-1d93ec92-19');
+    const text = await another.first().textContent();
     return this.parseAmount(text || '');
   }
 
