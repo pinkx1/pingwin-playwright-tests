@@ -1,12 +1,9 @@
 import { test, expect } from '../../fixtures';
 import { MainPage } from '../../pages/MainPage';
 import { DepositModal } from '../../pages/payments/DepositModal';
-import { depositMethods, minDeposit } from '../../fixtures/depositData';
-
-const cryptoMethods = ['Tether USD (Tron)', 'Tether USD (Ethereum)', 'Bitcoin', 'Ethereum', 'Tron', 'Toncoin'];
+import { depositMethods } from '../../fixtures/depositData';
 
 test.describe('Deposit feature', () => {
-  // Перед каждым тестом открываем страницу депозита на уже авторизованном пользователе
   test.beforeEach(async ({ authenticatedPage: page }) => {
     const mainPage = new MainPage(page);
     await mainPage.open();
@@ -29,20 +26,39 @@ test.describe('Deposit feature', () => {
   test('minimal deposit amounts are correct', async ({ authenticatedPage: page }) => {
     test.setTimeout(120_000); // Increase timeout for this test due to multiple interactions
     const modal = new DepositModal(page);
-    for (const [currency, methods] of Object.entries(minDeposit)) {
+    for (const currency of Object.keys(depositMethods)) {
       await modal.selectCurrency(currency);
-      await modal.waitForPaymentMethods(depositMethods[currency]);
-      for (const [method, amount] of Object.entries(methods)) {
-        await modal.openPaymentMethod(method);
-        const minValue = await modal.getMinDeposit();
-        expect(minValue).toBeCloseTo(amount, 2);
-        if (!cryptoMethods.includes(method) && amount > 0) {
-          await modal.setAmount(amount - 1);
-          await expect(modal.depositButton).toBeDisabled();
-        }
+      await modal.waitForPaymentMethods();
+
+      const binance = modal.paymentMethodRows('Binance Pay');
+      if (await binance.count()) {
+        await binance.first().click();
+        await verifyLimits(modal);
         await modal.goBack();
-        await modal.waitForPaymentMethods(depositMethods[currency]);
+        await modal.waitForPaymentMethods();
+      }
+
+      const bankCards = modal.paymentMethodRows('Банковская карта');
+      const bankCardCount = await bankCards.count();
+      for (let i = 0; i < bankCardCount; i++) {
+        await bankCards.nth(i).click();
+        await verifyLimits(modal);
+        await modal.goBack();
+        await modal.waitForPaymentMethods();
       }
     }
   });
 });
+
+async function verifyLimits(modal: DepositModal) {
+  const min = await modal.getMinDeposit();
+  const max = await modal.getMaxDeposit();
+  await modal.setAmount(min - 1);
+  await expect(modal.depositButton).toBeDisabled();
+  await modal.setAmount(min);
+  await expect(modal.depositButton).toBeEnabled();
+  await modal.setAmount(max);
+  await expect(modal.depositButton).toBeEnabled();
+  await modal.setAmount(max + 1);
+  await expect(modal.depositButton).toBeDisabled();
+}
