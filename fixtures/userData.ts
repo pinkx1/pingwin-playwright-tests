@@ -1,5 +1,5 @@
 export const validUser = {
-        email: 'dota2yulia@gmail.com',
+        email: '1488hesher@gmail.com',
         password: '123qweQWE!'
 };
 
