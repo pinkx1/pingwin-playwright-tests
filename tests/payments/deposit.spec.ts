@@ -4,7 +4,6 @@ import { DepositModal } from '../../pages/payments/DepositModal';
 import { depositMethods } from '../../fixtures/depositData';
 
 test.describe('Deposit feature', () => {
-  // Перед каждым тестом открываем страницу депозита на уже авторизованном пользователе
   test.beforeEach(async ({ authenticatedPage: page }) => {
     const mainPage = new MainPage(page);
     await mainPage.open();
