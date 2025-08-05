@@ -42,7 +42,18 @@ export class WithdrawalModal {
       .first();
     await expect(method, `Payment method ${name} not found`).toBeVisible();
     await method.click();
-    await this.dialog.getByText('Назад').waitFor();
+    const minLimit = this.dialog
+      .getByText('Минимальная сумма вывода:')
+      .locator('xpath=../div[2]');
+    const maxLimit = this.dialog.getByText('Макс.').locator('xpath=../div[1]');
+    await expect(
+      minLimit,
+      `Minimum limit for ${name} did not load`,
+    ).toHaveText(/\d/);
+    await expect(
+      maxLimit,
+      `Maximum limit for ${name} did not load`,
+    ).toHaveText(/\d/);
   }
 
   async goBack() {
