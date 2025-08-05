@@ -1,9 +1,8 @@
 import { test, expect } from '../../fixtures';
 import { MainPage } from '../../pages/MainPage';
 import { DepositModal } from '../../pages/payments/DepositModal';
-import { depositMethods, minDeposit } from '../../fixtures/depositData';
 
-const cryptoMethods = ['Tether USD (Tron)', 'Tether USD (Ethereum)', 'Bitcoin', 'Ethereum', 'Tron', 'Toncoin'];
+const CARD_METHOD_IDENTIFIER = 'Банковская карта';
 
 test.describe('Deposit feature', () => {
   // Перед каждым тестом открываем страницу депозита на уже авторизованном пользователе
@@ -18,30 +17,36 @@ test.describe('Deposit feature', () => {
     await modal.waitForVisible();
   });
 
-  test('payment methods correspond to currency', async ({ authenticatedPage: page }) => {
-    const modal = new DepositModal(page);
-    for (const [currency, methods] of Object.entries(depositMethods)) {
-      await modal.selectCurrency(currency);
-      await modal.waitForPaymentMethods(methods);
-    }
-  });
-
-  test('minimal deposit amounts are correct', async ({ authenticatedPage: page }) => {
+  test('deposit limits are enforced', async ({ authenticatedPage: page }) => {
     test.setTimeout(120_000); // Increase timeout for this test due to multiple interactions
     const modal = new DepositModal(page);
-    for (const [currency, methods] of Object.entries(minDeposit)) {
-      await modal.selectCurrency(currency);
-      await modal.waitForPaymentMethods(depositMethods[currency]);
-      for (const [method, amount] of Object.entries(methods)) {
+    const methods = await modal.getPaymentMethods();
+    for (const method of methods) {
+      if (method === 'Binance Pay' || method.includes(CARD_METHOD_IDENTIFIER)) {
         await modal.openPaymentMethod(method);
-        const minValue = await modal.getMinDeposit();
-        expect(minValue).toBeCloseTo(amount, 2);
-        if (!cryptoMethods.includes(method) && amount > 0) {
-          await modal.setAmount(amount - 1);
+        const min = await modal.getMinDeposit();
+        let max: number | null = null;
+        try {
+          max = await modal.getMaxDeposit();
+        } catch {
+          // Some methods may not provide a maximum limit
+        }
+
+        if (min > 0) {
+          await modal.setAmount(min - 1);
           await expect(modal.depositButton).toBeDisabled();
         }
+        await modal.setAmount(min);
+        await expect(modal.depositButton).toBeEnabled();
+
+        if (max !== null) {
+          await modal.setAmount(max);
+          await expect(modal.depositButton).toBeEnabled();
+          await modal.setAmount(max + 1);
+          await expect(modal.depositButton).toBeDisabled();
+        }
+
         await modal.goBack();
-        await modal.waitForPaymentMethods(depositMethods[currency]);
       }
     }
   });

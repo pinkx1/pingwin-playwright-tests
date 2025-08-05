@@ -77,6 +77,28 @@ export class DepositModal {
     return this.parseAmount(text || '');
   }
 
+  async getMaxDeposit(): Promise<number> {
+    const labels = [
+      'Максимальный депозит',
+      'Максимальная сумма пополнения',
+      'Максимальная сумма депозита',
+      'Максимальная сумма',
+      'Макс.'
+    ];
+
+    for (const label of labels) {
+      const locator = this.dialog.getByText(label);
+      if (await locator.count()) {
+        await locator.waitFor();
+        const value = locator.locator('..').locator('.sc-1d93ec92-19');
+        const text = await value.first().textContent();
+        return this.parseAmount(text || '');
+      }
+    }
+
+    throw new Error('Max deposit value not found');
+  }
+
   async setAmount(value: number) {
     await this.amountInput.fill(String(value));
   }
