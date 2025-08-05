@@ -25,10 +25,11 @@ test.describe('Deposit feature', () => {
       await test.step(`Currency: ${currency}`, async () => {
         await modal.selectCurrency(currency);
         const methods = await modal.getPaymentMethods();
-        for (const method of methods) {
+        for (let i = 0; i < methods.length; i++) {
+          const method = methods[i];
           if (method === 'Binance Pay' || method.includes(CARD_METHOD_IDENTIFIER)) {
             await test.step(`Method: ${method}`, async () => {
-              await modal.openPaymentMethod(method);
+              await modal.openPaymentMethodByIndex(i);
               const min = await modal.getMinDeposit();
               let max: number | null = null;
               try {
