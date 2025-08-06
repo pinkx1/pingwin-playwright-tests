@@ -107,7 +107,7 @@ test('provider filter works', async ({ authenticatedPage: page }) => {
   const playsonGame = page.getByRole('button').filter({ hasText: /Hot Coins/i }).first();
   await playsonGame.waitFor({ state: 'visible' });
   await expect(playsonGame, 'Игра Playson не найдена после фильтрации по провайдеру').toBeVisible();
-
+  await page.waitForTimeout(2000); // Ждем, чтобы все элементы успели отрисоваться
   const filteredOut = page.getByRole('button').filter({ hasText: /Magic Apple/i });
   const filteredCount = await filteredOut.count();
   expect(filteredCount, 'Ожидалось, что Magic Apple не попадёт в результат фильтрации по провайдеру').toBe(0);

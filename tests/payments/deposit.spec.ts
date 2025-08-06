@@ -3,6 +3,7 @@ import { MainPage } from '../../pages/MainPage';
 import { DepositModal } from '../../pages/payments/DepositModal';
 import { depositMethods } from '../../fixtures/depositData';
 
+test.describe.configure({ mode: 'serial' });
 test.describe('Deposit feature', () => {
   test.beforeEach(async ({ authenticatedPage: page }) => {
     const mainPage = new MainPage(page);

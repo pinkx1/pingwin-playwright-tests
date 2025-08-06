@@ -43,6 +43,7 @@ test.describe('Withdrawal feature', () => {
     await expect(methodsLocator, `Unexpected payment methods for currency ${currency}`).toHaveText(methods);
 
     for (const method of methods) {
+      await page.waitForTimeout(1000); // Wait for UI to stabilize
       await test.step(`Method: ${method}`, async () => {
         await modal.openPaymentMethod(method);
 

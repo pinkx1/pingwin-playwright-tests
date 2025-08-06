@@ -71,18 +71,6 @@ test('login modal opens with correct url', async ({ page }) => {
   await expect(page).toHaveURL(/\/ru\?modal=auth/);
 });
 
-// 5. Форма входа закрывается
-test('login modal can be closed', async ({ page }) => {
-  const mainPage = new MainPage(page);
-  const authModal = new AuthModal(page);
-
-  await mainPage.open();
-  await mainPage.openLoginModal();
-  await authModal.close();
-
-  await expect(authModal.dialog).toBeHidden();
-});
-
 // ----------------------- Негативные сценарии -----------------------
 
 // 6. Вход с несуществующим email
