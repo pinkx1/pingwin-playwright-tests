@@ -74,6 +74,8 @@ async function verifyLimits(modal: DepositModal) {
 }
 
 async function verifyAllMethods(modal: DepositModal) {
+  await verifyMethod(modal, 'Binance Pay');
+
   const bankCards = modal.paymentMethodRows('Банковская карта');
   const count = await bankCards.count();
   for (let i = 0; i < count; i++) {
@@ -82,4 +84,13 @@ async function verifyAllMethods(modal: DepositModal) {
     await modal.goBack();
     await modal.waitForPaymentMethods();
   }
+}
+
+async function verifyMethod(modal: DepositModal, name: string) {
+  const methodRow = modal.paymentMethodRows(name).first();
+  await expect(methodRow).toBeVisible();
+  await methodRow.click();
+  await verifyLimits(modal);
+  await modal.goBack();
+  await modal.waitForPaymentMethods();
 }
