@@ -25,7 +25,16 @@ export class WithdrawalModal {
 
   async selectCurrency(code: string) {
     await this.currencyButton.click();
-    await this.page.locator(`.currency-select__option img[src*="/${code}.png"]`).first().click();
+    const option = this.page
+      .locator('.currency-select__option')
+      .filter({ has: this.page.locator(`img[src*="/${code}.png"]`) })
+      .first();
+    await expect(option, `Currency ${code} option not found`).toBeVisible();
+    await option.click({ force: true, noWaitAfter: true });
+    await expect(
+      this.currencyButton.locator(`img[src*="/${code}.png"]`).first(),
+    ).toBeVisible();
+    await this.page.waitForLoadState('networkidle');
   }
 
   async waitForPaymentMethods(expected: string[], currency: string) {
