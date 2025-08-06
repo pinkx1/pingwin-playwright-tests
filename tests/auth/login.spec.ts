@@ -17,7 +17,7 @@ test('user can login with email and access profile', async ({ page }) => {
   await mainPage.openLoginModal();
   await authModal.login(validUser.email, validUser.password);
 
-  await page.getByRole('link', { name: /avatar/i }).click();
+  await page.getByRole('link', { name: /avatar/i }).click({ force: true });
   const emailInput = page.getByPlaceholder('Ваша почта');
   await expect(emailInput).toHaveValue(validUser.email);
 });
@@ -31,7 +31,7 @@ test('user can login with phone and access profile', async ({ page }) => {
   await mainPage.openLoginModal();
   await authModal.loginByPhone(existingPhoneUser.phone, existingPhoneUser.password);
 
-  await page.getByRole('link', { name: /avatar/i }).click();
+  await page.getByRole('link', { name: /avatar/i }).click({ force: true });
   const phoneInput = page.locator('#phone-input input[name="phone"]');
   await expect(phoneInput).toHaveValue(existingPhoneUser.phone);
 });

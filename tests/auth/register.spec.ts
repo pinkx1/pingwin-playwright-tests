@@ -311,7 +311,9 @@ test('registration under 18 is disabled', async ({ page }) => {
 test('email confirmation removes confirm button', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
-  const mailslurp = new MailSlurp({ apiKey: 'fecc6dbfce5284fda12515749ca6915bbe7f2532bd3d22b31c3f719117463573' });
+  const mailslurp = new MailSlurp({
+    apiKey: process.env.MAILSLURP_API_KEY!,
+  });
 
   const inbox = await mailslurp.inboxController.createInboxWithDefaults();
   const email = inbox.emailAddress as string;
