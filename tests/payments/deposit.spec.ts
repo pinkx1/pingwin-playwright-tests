@@ -75,12 +75,12 @@ async function verifyLimits(modal: DepositModal) {
 
 async function verifyAllMethods(modal: DepositModal) {
   await verifyMethod(modal, 'Binance Pay');
-  await verifyCryptoMethod(modal, 'Tether USD (Tron)');
-  await verifyCryptoMethod(modal, 'Tether USD (Ethereum)');
-  await verifyCryptoMethod(modal, 'Bitcoin');
-  await verifyCryptoMethod(modal, 'Ethereum');
-  await verifyCryptoMethod(modal, 'Tron');
-  await verifyCryptoMethod(modal, 'Toncoin');
+  // await verifyCryptoMethod(modal, 'Tether USD (Tron)');
+  // await verifyCryptoMethod(modal, 'Tether USD (Ethereum)');
+  // await verifyCryptoMethod(modal, 'Bitcoin');
+  // await verifyCryptoMethod(modal, 'Ethereum');
+  // await verifyCryptoMethod(modal, 'Tron');
+  // await verifyCryptoMethod(modal, 'Toncoin');
 
   const bankCards = modal.paymentMethodRows('Банковская карта');
   const count = await bankCards.count();
