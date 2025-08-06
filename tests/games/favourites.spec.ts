@@ -1,10 +1,5 @@
 import { test, expect } from '../../fixtures';
 
-// В этом файле используется authenticatedPage из fixtures.ts,
-// поэтому дополнительный логин перед каждым тестом больше не нужен.
-
-// Tests for favourites functionality
-
 test('add and remove game from favourites', async ({ authenticatedPage: page }) => {
   // ensure favourites empty
   await page.goto('/games/favorite');
@@ -18,6 +13,7 @@ test('add and remove game from favourites', async ({ authenticatedPage: page }) 
   await card.scrollIntoViewIfNeeded();
   await card.hover();
   await card.click();
+  await page.waitForTimeout(1000); // wait for animation
   const heartEmpty = page.locator('img[src*="heart-unfilled"]');
   await heartEmpty.waitFor({ state: 'visible' });
   await heartEmpty.click();
