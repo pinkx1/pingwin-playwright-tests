@@ -32,7 +32,6 @@ test('каталог игр отображает все категории и к
     const cards = categoryContainer.locator('[role="button"]');
     const count = await cards.count();
 
-    console.log(`🟢 Категория "${categoryName}" содержит ${count} карточек`);
     expect(count, `Ожидалось ровно 12 карточек в категории "${categoryName}", но найдено ${count}`).toBe(12);
 
     for (let i = 0; i < count; i++) {
@@ -154,23 +153,18 @@ for (const game of launchGames) {
     const iframe = page.locator('iframe.game-iframe');
     await page.pause(); // Даем время на загрузку iframe
 
-    console.log(`⌛ Ждём появления и видимости iframe для игры ${game}...`);
     try {
       await expect(iframe).toBeVisible({ timeout: 15000 });
-      console.log(`✅ iframe для игры ${game} найден и видим`);
     } catch (err) {
-      console.log(`❌ iframe для игры ${game} не появился или не стал видимым за 15 секунд`);
       throw err;
     }
     ///
     ///
-    console.log(`⌛ Ждём появления атрибута src у iframe для игры ${game}...`);
     let gameSrc: string | null = null;
     try {
       await expect
         .poll(async () => {
           const src = await iframe.getAttribute('src');
-          console.log(`🔍 iframe src сейчас: ${src}`);
           return src;
         }, {
           message: `iframe для игры ${game} не содержит src`,
@@ -179,10 +173,8 @@ for (const game of launchGames) {
         .not.toBeNull();
 
       gameSrc = await iframe.getAttribute('src');
-      console.log(`🔗 src для игры ${game}: ${gameSrc}`);
       expect(gameSrc, `src для iframe игры ${game} отсутствует`).toBeTruthy();
     } catch (err) {
-      console.log(`❌ Не удалось получить src у iframe для игры ${game}`);
       throw err;
     }
     ///
@@ -192,7 +184,6 @@ for (const game of launchGames) {
 
 
     const response = await page.request.get(gameSrc!);
-    console.log(`📥 Ответ для ${game}: ${response.status()} ${response.statusText()}`);
     expect(response.ok(), `Загрузка игры ${game} вернула статус ${response.status()}`).toBeTruthy();
   });
 }
