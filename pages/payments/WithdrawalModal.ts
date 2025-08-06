@@ -18,6 +18,15 @@ export class WithdrawalModal {
     this.withdrawTab = this.dialog.getByRole('button', { name: 'Вывод' });
     this.historyTab = this.dialog.getByRole('button', { name: 'История' });
   }
+  async openWithdrawTab() {
+    await this.withdrawTab.click();
+    await this.withdrawTab.waitFor({ state: 'visible' });
+    await this.withdrawTab.waitFor({ state: 'attached' });
+
+    await this.page.waitForTimeout(1000); // UI успевает отрисоваться
+  }
+
+
 
   async selectCurrency(code: string) {
     await this.currencyButton.click();
@@ -57,26 +66,60 @@ export class WithdrawalModal {
   }
 
   async setAmount(value: number) {
-    await this.amountInput.fill(String(value));
+    const digitsOnly = String(value).replace(/[^\d]/g, '');
+    await this.amountInput.fill(digitsOnly);
   }
+
 
   private parseAmount(text: string): number {
-    return parseInt(text.replace(/[^0-9]/g, ''), 10);
+    const cleaned = text.replace(/[^\d]/g, '');
+    console.log(`Parsed amount from "${text}" → "${cleaned}"`);
+    return parseInt(cleaned, 10);
   }
+
+
+
+
 
   async getMinLimit(): Promise<number> {
-    const text = await this.dialog
-      .getByText('Минимальная сумма вывода:')
-      .locator('xpath=../div[2]')
-      .innerText();
+    const label = this.dialog.locator('div.brzKwJ:has-text("Минимальная сумма вывода:")');
+    const valueLocator = label.locator('xpath=following-sibling::div[contains(@class, "hLypHw")]');
+
+    let text = '';
+    const timeout = 5000;
+    const start = Date.now();
+
+    while (Date.now() - start < timeout) {
+      text = await valueLocator.innerText();
+      if (/\d/.test(text)) break;
+      await this.page.waitForTimeout(100);
+    }
+
+    console.log('Минимум raw:', JSON.stringify(text));
     return this.parseAmount(text);
   }
 
+
+
+
+
   async getMaxLimit(): Promise<number> {
-    const text = await this.dialog
-      .getByText('Макс.')
-      .locator('xpath=../div[1]')
-      .innerText();
+    const label = this.dialog.locator('div.iwDBoV:has-text("Макс.")');
+    const valueLocator = label.locator('xpath=preceding-sibling::div[contains(@class, "hLypHw")]');
+
+    let text = '';
+    const timeout = 5000;
+    const start = Date.now();
+
+    while (Date.now() - start < timeout) {
+      text = await valueLocator.innerText();
+      if (/\d/.test(text)) break;
+      await this.page.waitForTimeout(100);
+    }
+
+    console.log('Максимум raw:', JSON.stringify(text));
     return this.parseAmount(text);
   }
+
+
 }
