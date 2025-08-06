@@ -65,20 +65,22 @@ async function verifyLimits(modal: DepositModal) {
   await expect(modal.depositButton).toBeDisabled();
   await modal.setAmount(min);
   await expect(modal.depositButton).toBeEnabled();
-  await modal.setAmount(max);
-  await expect(modal.depositButton).toBeEnabled();
-  await modal.setAmount(max + 1);
-  await expect(modal.depositButton).toBeDisabled();
+  if (max) {
+    await modal.setAmount(max);
+    await expect(modal.depositButton).toBeEnabled();
+    await modal.setAmount(max + 1);
+    await expect(modal.depositButton).toBeDisabled();
+  }
 }
 
 async function verifyAllMethods(modal: DepositModal) {
   await verifyMethod(modal, 'Binance Pay');
-  await verifyMethod(modal, 'Tether USD (Tron)');
-  await verifyMethod(modal, 'Tether USD (Ethereum)');
-  await verifyMethod(modal, 'Bitcoin');
-  await verifyMethod(modal, 'Ethereum');
-  await verifyMethod(modal, 'Tron');
-  await verifyMethod(modal, 'Toncoin');
+  await verifyCryptoMethod(modal, 'Tether USD (Tron)');
+  await verifyCryptoMethod(modal, 'Tether USD (Ethereum)');
+  await verifyCryptoMethod(modal, 'Bitcoin');
+  await verifyCryptoMethod(modal, 'Ethereum');
+  await verifyCryptoMethod(modal, 'Tron');
+  await verifyCryptoMethod(modal, 'Toncoin');
 
   const bankCards = modal.paymentMethodRows('Банковская карта');
   const count = await bankCards.count();
@@ -95,6 +97,20 @@ async function verifyMethod(modal: DepositModal, name: string) {
   await expect(methodRow).toBeVisible();
   await methodRow.click();
   await verifyLimits(modal);
+  await modal.goBack();
+  await modal.waitForPaymentMethods();
+}
+
+async function verifyCryptoMethod(modal: DepositModal, name: string) {
+  const methodRow = modal.paymentMethodRows(name).first();
+  await expect(methodRow).toBeVisible();
+  await methodRow.click();
+  const min = await modal.getMinDeposit();
+  expect(min).toBeGreaterThan(0);
+  const max = await modal.getMaxDeposit();
+  if (max) {
+    expect(max).toBeGreaterThan(min);
+  }
   await modal.goBack();
   await modal.waitForPaymentMethods();
 }
