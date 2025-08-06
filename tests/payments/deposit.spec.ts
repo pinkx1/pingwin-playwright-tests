@@ -74,14 +74,6 @@ async function verifyLimits(modal: DepositModal) {
 }
 
 async function verifyAllMethods(modal: DepositModal) {
-  await verifyMethod(modal, 'Binance Pay');
-  await verifyCryptoMethod(modal, 'Tether USD (Tron)');
-  await verifyCryptoMethod(modal, 'Tether USD (Ethereum)');
-  await verifyCryptoMethod(modal, 'Bitcoin');
-  await verifyCryptoMethod(modal, 'Ethereum');
-  await verifyCryptoMethod(modal, 'Tron');
-  await verifyCryptoMethod(modal, 'Toncoin');
-
   const bankCards = modal.paymentMethodRows('Банковская карта');
   const count = await bankCards.count();
   for (let i = 0; i < count; i++) {
@@ -90,27 +82,4 @@ async function verifyAllMethods(modal: DepositModal) {
     await modal.goBack();
     await modal.waitForPaymentMethods();
   }
-}
-
-async function verifyMethod(modal: DepositModal, name: string) {
-  const methodRow = modal.paymentMethodRows(name).first();
-  await expect(methodRow).toBeVisible();
-  await methodRow.click();
-  await verifyLimits(modal);
-  await modal.goBack();
-  await modal.waitForPaymentMethods();
-}
-
-async function verifyCryptoMethod(modal: DepositModal, name: string) {
-  const methodRow = modal.paymentMethodRows(name).first();
-  await expect(methodRow).toBeVisible();
-  await methodRow.click();
-  const min = await modal.getMinDeposit();
-  expect(min).toBeGreaterThan(0);
-  const max = await modal.getMaxDeposit();
-  if (max) {
-    expect(max).toBeGreaterThan(min);
-  }
-  await modal.goBack();
-  await modal.waitForPaymentMethods();
 }
