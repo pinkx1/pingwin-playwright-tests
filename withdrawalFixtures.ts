@@ -22,8 +22,6 @@ base.beforeAll(async ({ browser }) => {
     await mainPage.open();
     await mainPage.openLoginModal();
     await authModal.login(withdrawalUser.email, withdrawalUser.password);
-    await authModal.closeSmsConfirmationIfVisible();
-    await authModal.closeEmailConfirmationIfVisible();
 
     // Save signed-in state to reuse later
     await page.context().storageState({ path: STORAGE_PATH });
