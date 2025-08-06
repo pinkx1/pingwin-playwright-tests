@@ -5,6 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
 // dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 export default defineConfig({
+  globalSetup: './auth/global-setup',
   testDir: './tests',
   timeout: 60_000,
   fullyParallel: true,

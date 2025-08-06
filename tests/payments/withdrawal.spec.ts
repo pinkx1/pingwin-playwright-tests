@@ -1,4 +1,4 @@
-import { test, expect } from '../../withdrawalFixtures';
+import { test, expect } from '../../auth/userWithBalance';
 import { MainPage } from '../../pages/MainPage';
 import { WithdrawalModal } from '../../pages/payments/WithdrawalModal';
 import { withdrawalMethods } from '../../fixtures/withdrawalData';
