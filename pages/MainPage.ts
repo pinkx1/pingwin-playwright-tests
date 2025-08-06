@@ -1,10 +1,10 @@
 import { Page } from '@playwright/test';
 
 export class MainPage {
-        constructor(private page: Page) { }
+        constructor(private page: Page, private baseURL: string = '/') { }
 
         async open() {
-                await this.page.goto('/');
+                await this.page.goto(this.baseURL); // теперь работает и с полным урлом
         }
 
         async openLoginModal() {

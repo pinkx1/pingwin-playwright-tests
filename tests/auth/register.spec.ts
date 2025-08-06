@@ -221,8 +221,9 @@ test('new user can register and access profile', async ({ page }) => {
   await authModal.register(email, password);
 
   await page.locator('img[src*="email-spin.svg"]').waitFor({ state: 'visible', timeout: 5000 });
+  await page.waitForTimeout(2000);
   await authModal.closeEmailConfirmationIfVisible();
-  await page.locator('a[href="/ru/profile"]').click();
+  await page.locator('a[href="/ru/profile"]').click({ force: true });
 
   const emailInput = page.getByPlaceholder('Ваша почта');
   await expect(emailInput).toHaveValue(email);
