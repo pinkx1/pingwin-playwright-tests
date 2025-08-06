@@ -88,13 +88,20 @@ export class DepositModal {
       return this.parseAmount(text || '');
     }
     const altLabel = this.dialog.getByText('Минимальная сумма пополнения');
-    await altLabel.waitFor();
-    const alt = altLabel.locator('..').locator('.sc-1d93ec92-19');
-    const text = await alt.first().textContent();
+    if (await altLabel.count()) {
+      await altLabel.waitFor();
+      const alt = altLabel.locator('..').locator('.sc-1d93ec92-19');
+      const text = await alt.first().textContent();
+      return this.parseAmount(text || '');
+    }
+    const secondaryAlt = this.dialog.getByText('Минимальная сумма депозита');
+    await secondaryAlt.waitFor();
+    const secondary = secondaryAlt.locator('..').locator('.sc-1d93ec92-19');
+    const text = await secondary.first().textContent();
     return this.parseAmount(text || '');
   }
 
-  async getMaxDeposit(): Promise<number> {
+  async getMaxDeposit(): Promise<number | null> {
     const primaryLabel = this.dialog.getByText('Максимальный депозит');
     if (await primaryLabel.count()) {
       await primaryLabel.waitFor();
@@ -110,10 +117,13 @@ export class DepositModal {
       return this.parseAmount(text || '');
     }
     const anotherLabel = this.dialog.getByText('Максимальная сумма пополнения');
-    await anotherLabel.waitFor();
-    const another = anotherLabel.locator('..').locator('.sc-1d93ec92-19');
-    const text = await another.first().textContent();
-    return this.parseAmount(text || '');
+    if (await anotherLabel.count()) {
+      await anotherLabel.waitFor();
+      const another = anotherLabel.locator('..').locator('.sc-1d93ec92-19');
+      const text = await another.first().textContent();
+      return this.parseAmount(text || '');
+    }
+    return null;
   }
 
   async setAmount(value: number) {
