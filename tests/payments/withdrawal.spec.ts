@@ -11,6 +11,7 @@ test.describe('Withdrawal feature', () => {
     await mainPage.openDepositModal();
     const modal = new WithdrawalModal(page);
     await modal.withdrawTab.click();
+    await expect(modal.currencyButton).toBeVisible();
   });
 
   test('withdrawal modal is visible', async ({ authenticatedPage: page }) => {
