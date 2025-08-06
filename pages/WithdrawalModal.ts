@@ -85,7 +85,7 @@ export class WithdrawalModal {
     const valueLocator = label.locator('xpath=following-sibling::div[contains(@class, "hLypHw")]');
 
     let text = '';
-    const timeout = 5000;
+    const timeout = 2000;
     const start = Date.now();
 
     while (Date.now() - start < timeout) {
@@ -106,7 +106,7 @@ export class WithdrawalModal {
     const valueLocator = label.locator('xpath=preceding-sibling::div[contains(@class, "hLypHw")]');
 
     let text = '';
-    const timeout = 5000;
+    const timeout = 2000;
     const start = Date.now();
 
     while (Date.now() - start < timeout) {
