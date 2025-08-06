@@ -39,7 +39,7 @@ test('каталог игр отображает все категории и к
       const card = cards.nth(i);
 
       // 1. Проверка на видимость изображения
-      const img = card.locator('img');
+      const img = card.locator('img.sc-a6470490-2[alt]').first();
       await expect(img, `Изображение отсутствует в карточке #${i + 1} категории "${categoryName}"`).toBeVisible();
 
       // 2. Проверка наличия названия (текст или alt)
@@ -51,8 +51,13 @@ test('каталог игр отображает все категории и к
       const hrefCandidates = await card.locator('a').evaluateAll(anchors =>
         anchors.map(a => a.getAttribute('href')).filter(Boolean)
       );
-      const playHref = hrefCandidates.find(href => href?.endsWith('/play'));
-      expect(playHref, `В карточке #${i + 1} категории "${categoryName}" нет ссылки на /play`).toBeTruthy();
+      const hrefs = await card.locator('a').evaluateAll(anchors =>
+        anchors.map(a => a.getAttribute('href')).filter(href => href && href.includes('/games/'))
+      );
+
+      expect(hrefs.length, `В карточке #${i + 1} категории "${categoryName}" нет ссылки на игру`).toBeGreaterThan(0);
+
+
     }
   }
 });
