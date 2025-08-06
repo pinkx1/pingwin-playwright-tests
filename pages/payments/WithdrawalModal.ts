@@ -73,7 +73,6 @@ export class WithdrawalModal {
 
   private parseAmount(text: string): number {
     const cleaned = text.replace(/[^\d]/g, '');
-    console.log(`Parsed amount from "${text}" → "${cleaned}"`);
     return parseInt(cleaned, 10);
   }
 
@@ -95,7 +94,6 @@ export class WithdrawalModal {
       await this.page.waitForTimeout(100);
     }
 
-    console.log('Минимум raw:', JSON.stringify(text));
     return this.parseAmount(text);
   }
 
@@ -117,7 +115,6 @@ export class WithdrawalModal {
       await this.page.waitForTimeout(100);
     }
 
-    console.log('Максимум raw:', JSON.stringify(text));
     return this.parseAmount(text);
   }
 
