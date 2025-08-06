@@ -1,7 +1,6 @@
 import { test, expect } from '../../fixtures';
 import { MainPage } from '../../pages/MainPage';
 import { DepositModal } from '../../pages/payments/DepositModal';
-import { depositMethods } from '../../fixtures/depositData';
 
 test.describe.configure({ mode: 'serial' });
 test.describe('Deposit feature', () => {
@@ -16,38 +15,46 @@ test.describe('Deposit feature', () => {
     await modal.waitForVisible();
   });
 
-  test('payment methods correspond to currency', async ({ authenticatedPage: page }) => {
+  test('USD deposit limits are correct', async ({ authenticatedPage: page }) => {
     const modal = new DepositModal(page);
-    for (const [currency, methods] of Object.entries(depositMethods)) {
-      await modal.selectCurrency(currency);
-      await modal.waitForPaymentMethods(methods);
-    }
+    await modal.selectCurrency('USD');
+    await modal.waitForPaymentMethods();
+    await verifyAllMethods(modal);
   });
 
-  test('minimal deposit amounts are correct', async ({ authenticatedPage: page }) => {
-    test.setTimeout(120_000); // Increase timeout for this test due to multiple interactions
+  test('EUR deposit limits are correct', async ({ authenticatedPage: page }) => {
     const modal = new DepositModal(page);
-    for (const currency of Object.keys(depositMethods)) {
-      await modal.selectCurrency(currency);
-      await modal.waitForPaymentMethods();
+    await modal.selectCurrency('EUR');
+    await modal.waitForPaymentMethods();
+    await verifyAllMethods(modal);
+  });
 
-      const binance = modal.paymentMethodRows('Binance Pay');
-      if (await binance.count()) {
-        await binance.first().click();
-        await verifyLimits(modal);
-        await modal.goBack();
-        await modal.waitForPaymentMethods();
-      }
+  test('UAH deposit limits are correct', async ({ authenticatedPage: page }) => {
+    const modal = new DepositModal(page);
+    await modal.selectCurrency('UAH');
+    await modal.waitForPaymentMethods();
+    await verifyAllMethods(modal);
+  });
 
-      const bankCards = modal.paymentMethodRows('Банковская карта');
-      const bankCardCount = await bankCards.count();
-      for (let i = 0; i < bankCardCount; i++) {
-        await bankCards.nth(i).click();
-        await verifyLimits(modal);
-        await modal.goBack();
-        await modal.waitForPaymentMethods();
-      }
-    }
+  test('KZT deposit limits are correct', async ({ authenticatedPage: page }) => {
+    const modal = new DepositModal(page);
+    await modal.selectCurrency('KZT');
+    await modal.waitForPaymentMethods();
+    await verifyAllMethods(modal);
+  });
+
+  test('RON deposit limits are correct', async ({ authenticatedPage: page }) => {
+    const modal = new DepositModal(page);
+    await modal.selectCurrency('RON');
+    await modal.waitForPaymentMethods();
+    await verifyAllMethods(modal);
+  });
+
+  test('UZS deposit limits are correct', async ({ authenticatedPage: page }) => {
+    const modal = new DepositModal(page);
+    await modal.selectCurrency('UZS');
+    await modal.waitForPaymentMethods();
+    await verifyAllMethods(modal);
   });
 });
 
@@ -62,4 +69,32 @@ async function verifyLimits(modal: DepositModal) {
   await expect(modal.depositButton).toBeEnabled();
   await modal.setAmount(max + 1);
   await expect(modal.depositButton).toBeDisabled();
+}
+
+async function verifyAllMethods(modal: DepositModal) {
+  await verifyMethod(modal, 'Binance Pay');
+  await verifyMethod(modal, 'Tether USD (Tron)');
+  await verifyMethod(modal, 'Tether USD (Ethereum)');
+  await verifyMethod(modal, 'Bitcoin');
+  await verifyMethod(modal, 'Ethereum');
+  await verifyMethod(modal, 'Tron');
+  await verifyMethod(modal, 'Toncoin');
+
+  const bankCards = modal.paymentMethodRows('Банковская карта');
+  const count = await bankCards.count();
+  for (let i = 0; i < count; i++) {
+    await bankCards.nth(i).click();
+    await verifyLimits(modal);
+    await modal.goBack();
+    await modal.waitForPaymentMethods();
+  }
+}
+
+async function verifyMethod(modal: DepositModal, name: string) {
+  const methodRow = modal.paymentMethodRows(name).first();
+  await expect(methodRow).toBeVisible();
+  await methodRow.click();
+  await verifyLimits(modal);
+  await modal.goBack();
+  await modal.waitForPaymentMethods();
 }
