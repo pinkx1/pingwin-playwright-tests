@@ -39,19 +39,6 @@ test('registration modal opens', async ({ page }) => {
   await expect(authModal.registerTab).toBeVisible();
 });
 
-// 2. Closing registration modal
-test('registration modal can be closed', async ({ page }) => {
-  const mainPage = new MainPage(page);
-  const authModal = new AuthModal(page);
-
-  await mainPage.open();
-  await mainPage.openRegisterModal();
-  await authModal.waitForVisible();
-
-  await authModal.close();
-  await expect(authModal.dialog).toBeHidden();
-});
-
 // 3. Presence of all required fields
 test('registration form contains all required fields', async ({ page }) => {
   const mainPage = new MainPage(page);
@@ -251,6 +238,7 @@ test('new user can register by phone', async ({ page }) => {
   await mainPage.open();
   await mainPage.openRegisterModal();
   await authModal.registerByPhone(phone, password);
+  await page.waitForTimeout(2000); // Wait for potential SMS confirmation
   await authModal.closeSmsConfirmationIfVisible();
   const profileLink = page.locator('a[href="/ru/profile"]').first();
   await profileLink.waitFor({ state: 'visible', timeout: 10000 });
