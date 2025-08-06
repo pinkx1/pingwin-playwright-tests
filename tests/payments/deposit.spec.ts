@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures';
 import { MainPage } from '../../pages/MainPage';
-import { DepositModal } from '../../pages/payments/DepositModal';
+import { DepositModal } from '../../pages/DepositModal';
 
 test.describe.configure({ mode: 'serial' });
 test.describe('Deposit feature', () => {
