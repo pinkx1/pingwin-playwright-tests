@@ -1,6 +1,6 @@
 export const validUser = {
         email: 'kotmanul00@gmail.com',
-        password: '123qweQWE!'
+        password: '     '
 };
 
 export const existingPhoneUser = {
