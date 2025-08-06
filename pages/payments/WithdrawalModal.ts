@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 
 export class WithdrawalModal {
   readonly page: Page;
@@ -19,41 +19,28 @@ export class WithdrawalModal {
     this.historyTab = this.dialog.getByRole('button', { name: 'История' });
   }
 
-  async waitForVisible() {
-    await expect(this.dialog).toBeVisible();
-  }
-
   async selectCurrency(code: string) {
     await this.currencyButton.click();
     await this.page.locator(`.currency-select__option img[src*="/${code}.png"]`).first().click();
   }
 
-  async waitForPaymentMethods(expected: string[], currency: string) {
-    await expect(
-      this.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18'),
-      `Unexpected payment methods for currency ${currency}`,
-    ).toHaveText(expected);
+  async getPaymentMethods(): Promise<string[]> {
+    return await this.dialog
+      .locator('div.sc-90dc3735-3 div.sc-1d93ec92-18')
+      .allTextContents();
   }
 
   async openPaymentMethod(name: string) {
     const method = this.dialog
       .locator('div.sc-90dc3735-3')
-      .locator(`text="${name}"`) // select the payment method by name
+      .locator(`text="${name}"`)
       .first();
-    await expect(method, `Payment method ${name} not found`).toBeVisible();
     await method.click();
-    const minLimit = this.dialog
+    await this.dialog
       .getByText('Минимальная сумма вывода:')
-      .locator('xpath=../div[2]');
-    const maxLimit = this.dialog.getByText('Макс.').locator('xpath=../div[1]');
-    await expect(
-      minLimit,
-      `Minimum limit for ${name} did not load`,
-    ).toHaveText(/\d/);
-    await expect(
-      maxLimit,
-      `Maximum limit for ${name} did not load`,
-    ).toHaveText(/\d/);
+      .locator('xpath=../div[2]')
+      .waitFor();
+    await this.dialog.getByText('Макс.').locator('xpath=../div[1]').waitFor();
   }
 
   async goBack() {

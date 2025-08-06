@@ -15,14 +15,20 @@ test.describe('Withdrawal feature', () => {
 
   test('withdrawal modal is visible', async ({ authenticatedPage: page }) => {
     const modal = new WithdrawalModal(page);
-    await modal.waitForVisible();
+    await expect(modal.dialog).toBeVisible();
   });
 
   test('payment methods correspond to currency', async ({ authenticatedPage: page }) => {
     const modal = new WithdrawalModal(page);
     for (const [currency, methods] of Object.entries(withdrawalMethods)) {
       await modal.selectCurrency(currency);
-      await modal.waitForPaymentMethods(methods, currency);
+      const methodsLocator = modal.dialog.locator(
+        'div.sc-90dc3735-3 div.sc-1d93ec92-18',
+      );
+      await expect(
+        methodsLocator,
+        `Unexpected payment methods for currency ${currency}`,
+      ).toHaveText(methods);
     }
   });
 
@@ -30,7 +36,13 @@ test.describe('Withdrawal feature', () => {
     const methods = withdrawalMethods[currency];
     const modal = new WithdrawalModal(page);
     await modal.selectCurrency(currency);
-    await modal.waitForPaymentMethods(methods, currency);
+    const methodsLocator = modal.dialog.locator(
+      'div.sc-90dc3735-3 div.sc-1d93ec92-18',
+    );
+    await expect(
+      methodsLocator,
+      `Unexpected payment methods for currency ${currency}`,
+    ).toHaveText(methods);
     for (const method of methods) {
       await test.step(`Method: ${method}`, async () => {
         await modal.openPaymentMethod(method);
@@ -71,7 +83,10 @@ test.describe('Withdrawal feature', () => {
           `${currency} ${method}: entered ${actualAbove} > max ${max} – expected red color`,
         ).toHaveCSS('color', 'rgb(218, 68, 68)');
         await modal.goBack();
-        await modal.waitForPaymentMethods(methods, currency);
+        await expect(
+          methodsLocator,
+          `Unexpected payment methods for currency ${currency}`,
+        ).toHaveText(methods);
       });
     }
   }
