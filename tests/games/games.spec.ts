@@ -57,7 +57,7 @@ test('каталог игр отображает все категории и к
   }
 });
 
-test('search and filters work', async ({ authenticatedPage: page }) => {
+test('search works', async ({ authenticatedPage: page }) => {
   await page.goto('/games');
 
   const search = page.getByPlaceholder('Найди свою игру');
@@ -74,13 +74,14 @@ test('search and filters work', async ({ authenticatedPage: page }) => {
   await expect(
     page.getByRole('button').filter({ hasText: /^Magic Apple$/ })
   ).toHaveCount(0);
+});
 
+test('category filter works', async ({ authenticatedPage: page }) => {
+  await page.goto('/games');
 
-  // 🗂️ Фильтр по категории
   const categoryFilter = page.locator('div.react-select__single-value', { hasText: 'Фильтр' });
   await expect(categoryFilter, 'Фильтр по категориям не найден').toBeVisible();
   await categoryFilter.click();
-
 
   const booksOption = page.locator('[role="option"]').filter({ hasText: 'Книги' }).first();
   await expect(booksOption, 'Опция "Книги" в фильтре не найдена').toBeVisible();
@@ -91,8 +92,11 @@ test('search and filters work', async ({ authenticatedPage: page }) => {
   await expect(
     page.getByRole('button').filter({ hasText: /Magic Apple/i })
   ).toHaveCount(0);
+});
 
-  // 🧪 Фильтр по провайдеру
+test('provider filter works', async ({ authenticatedPage: page }) => {
+  await page.goto('/games');
+
   const providerFilter = page.locator('div.react-select__single-value', { hasText: 'Провайдеры' });
   await expect(providerFilter, 'Фильтр по провайдерам не найден').toBeVisible();
   await providerFilter.click();
@@ -107,8 +111,6 @@ test('search and filters work', async ({ authenticatedPage: page }) => {
   const filteredOut = page.getByRole('button').filter({ hasText: /Magic Apple/i });
   const filteredCount = await filteredOut.count();
   expect(filteredCount, 'Ожидалось, что Magic Apple не попадёт в результат фильтрации по провайдеру').toBe(0);
-
-
 });
 
 
