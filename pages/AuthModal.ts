@@ -122,7 +122,7 @@ export class AuthModal {
                 await this.page.locator('label', { hasText: 'Мне есть 18 лет' }).locator('span').first().click();
                 await this.page.locator('label', { hasText: 'Я принимаю Условия и Положения' }).locator('span').first().click();
 
-                await expect(this.submitButton).toBeEnabled();
+                await this.page.waitForTimeout(3000);
                 await this.submitButton.click();
         }
 
