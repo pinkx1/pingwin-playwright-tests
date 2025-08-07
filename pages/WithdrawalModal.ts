@@ -22,21 +22,12 @@ export class WithdrawalModal {
     await this.withdrawTab.click();
     await this.withdrawTab.waitFor({ state: 'visible' });
     await this.withdrawTab.waitFor({ state: 'attached' });
-
-    await this.page.waitForTimeout(1000); // UI успевает отрисоваться
+    await this.page.waitForTimeout(1000);
   }
-
-
 
   async selectCurrency(code: string) {
     await this.currencyButton.click();
     await this.page.locator(`.currency-select__option img[src*="/${code}.png"]`).first().click();
-  }
-
-  async getPaymentMethods(): Promise<string[]> {
-    return await this.dialog
-      .locator('div.sc-90dc3735-3 div.sc-1d93ec92-18')
-      .allTextContents();
   }
 
   async openPaymentMethod(name: string) {
@@ -61,62 +52,47 @@ export class WithdrawalModal {
     return this.dialog.locator('input[name="amount"]');
   }
 
-  get withdrawButton() {
-    return this.dialog.getByRole('button', { name: /Вывести/ });
-  }
-
   async setAmount(value: number) {
     const digitsOnly = String(value).replace(/[^\d]/g, '');
     await this.amountInput.fill(digitsOnly);
   }
-
 
   private parseAmount(text: string): number {
     const cleaned = text.replace(/[^\d]/g, '');
     return parseInt(cleaned, 10);
   }
 
-
-
-
-
   async getMinLimit(): Promise<number> {
     const label = this.dialog.locator('div.brzKwJ:has-text("Минимальная сумма вывода:")');
     const valueLocator = label.locator('xpath=following-sibling::div[contains(@class, "hLypHw")]');
 
-    let text = '';
-    const timeout = 2000;
-    const start = Date.now();
+    const elementHandle = await valueLocator.elementHandle();
+    if (!elementHandle) throw new Error('Min limit element not found');
 
-    while (Date.now() - start < timeout) {
-      text = await valueLocator.innerText();
-      if (/\d/.test(text)) break;
-      await this.page.waitForTimeout(100);
-    }
+    await this.page.waitForFunction(
+      el => el && /\d/.test((el as HTMLElement).innerText),
+      elementHandle,
+      { timeout: 1500 }
+    );
 
+    const text = await valueLocator.evaluate(el => (el as HTMLElement).innerText);
     return this.parseAmount(text);
   }
-
-
-
-
 
   async getMaxLimit(): Promise<number> {
     const label = this.dialog.locator('div.iwDBoV:has-text("Макс.")');
     const valueLocator = label.locator('xpath=preceding-sibling::div[contains(@class, "hLypHw")]');
 
-    let text = '';
-    const timeout = 2000;
-    const start = Date.now();
+    const elementHandle = await valueLocator.elementHandle();
+    if (!elementHandle) throw new Error('Max limit element not found');
 
-    while (Date.now() - start < timeout) {
-      text = await valueLocator.innerText();
-      if (/\d/.test(text)) break;
-      await this.page.waitForTimeout(100);
-    }
+    await this.page.waitForFunction(
+      el => el && /\d/.test((el as HTMLElement).innerText),
+      elementHandle,
+      { timeout: 2000 }
+    );
 
+    const text = await valueLocator.evaluate(el => (el as HTMLElement).innerText);
     return this.parseAmount(text);
   }
-
-
 }
