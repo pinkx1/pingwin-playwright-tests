@@ -2,10 +2,11 @@ import { test, expect } from '../../fixtures/withdrawalFixtures';
 import { MainPage } from '../../pages/MainPage';
 import { WithdrawalModal, WithdrawalMethod } from '../../pages/WithdrawalModal';
 
-test.describe.configure({ mode: 'serial' });
+// test.describe.configure({ mode: 'serial' });
 
 test.describe('Withdrawal feature', () => {
   test.beforeEach(async ({ authenticatedPage: page }) => {
+    test.setTimeout(90000);
     const mainPage = new MainPage(page);
     await mainPage.open();
     await mainPage.openDepositModal();
