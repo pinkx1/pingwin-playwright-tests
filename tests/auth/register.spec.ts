@@ -19,7 +19,7 @@ async function checkRequiredCheckboxes(page) {
 }
 
 // 1. Opening registration modal
-test.only('registration modal opens', async ({ page }) => {
+test('registration modal opens', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
