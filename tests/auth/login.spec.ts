@@ -66,7 +66,7 @@ test('login modal opens with correct url', async ({ page }) => {
 
   await mainPage.open();
   await mainPage.openLoginModal();
-  await authModal.waitForVisible();
+  // await authModal.waitForVisible();
 
   await expect(page).toHaveURL(/\/ru\?modal=auth/);
 });

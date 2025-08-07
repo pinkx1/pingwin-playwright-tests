@@ -3,7 +3,7 @@ import { chromium } from '@playwright/test';
 import fs from 'fs';
 import { MainPage } from './pages/MainPage';
 import { AuthModal } from './pages/AuthModal';
-import { validUser, withdrawalUser } from './fixtures/userData';
+import { validUser, withdrawalUser } from './fixtures/data/userData';
 
 async function loginAndSaveState(user: { email: string; password: string }, storagePath: string) {
 	const browser = await chromium.launch();
