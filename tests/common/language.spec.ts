@@ -14,7 +14,7 @@ const languages = [
 ];
 
 for (const { name, deposit } of languages) {
-  test.only(`deposit button is translated to ${deposit} for ${name}`, async ({ authenticatedPage: page }) => {
+  test(`deposit button is translated to ${deposit} for ${name}`, async ({ authenticatedPage: page }) => {
     await page.goto('/');
     await page.waitForTimeout(1000); // ждем появления кнопки после загрузки
 
