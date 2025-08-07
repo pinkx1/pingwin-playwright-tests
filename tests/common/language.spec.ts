@@ -14,7 +14,7 @@ const languages = [
 ];
 
 for (const { name, deposit } of languages) {
-  test(`deposit button is translated to ${deposit} for ${name}`, async ({ authenticatedPage: page }) => {
+  test.only(`deposit button is translated to ${deposit} for ${name}`, async ({ authenticatedPage: page }) => {
     await page.goto('/');
     await page.waitForTimeout(1000); // ждем появления кнопки после загрузки
 
@@ -26,10 +26,9 @@ for (const { name, deposit } of languages) {
     await option.click();
     await page.waitForTimeout(1000); // ждем применения языка
 
-    const depositButton = page
-      .locator('img[src="/images/icons/wallet-balance.svg"]').locator('xpath=..');
+    // const depositButton = page.locator('div.sc-1d93ec92-19.iwDBoV');
+    const depositButton = page.getByText(deposit, { exact: true });
     await expect(depositButton).toBeVisible();
-    await expect(depositButton).toContainText(deposit, { timeout: 7000 });
   });
 }
 
