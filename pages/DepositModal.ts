@@ -1,10 +1,14 @@
 import { Page, Locator, expect } from '@playwright/test';
 
 export interface DepositMethod {
+  method: string;
   name: string;
   minAmount: number;
   maxAmount: number;
+  icon: string;
 }
+
+
 
 export class DepositModal {
   readonly page: Page;
@@ -61,10 +65,13 @@ export class DepositModal {
     const json = await methodsResponse.json();
     await this.waitForPaymentMethods();
     return json.methods.map((m: any) => ({
+      method: m.method,
       name: m.name,
       minAmount: m.minAmount,
       maxAmount: m.maxAmount,
+      icon: m.icon,
     }));
+
   }
 
   async waitForPaymentMethods(expected?: string[]) {
@@ -180,4 +187,14 @@ export class DepositModal {
     const normalized = text.replace(/\s/g, '').replace(/,/g, '').replace(/[^0-9.]/g, '');
     return parseFloat(normalized);
   }
+
+  getPaymentMethodRow(method: DepositMethod): Locator {
+    const iconFile = method.icon.split('/').pop();
+    return this.methodsContainer.locator('> div').filter({
+      hasText: method.name,
+      has: this.page.locator(`img[src*="${iconFile}"]`)
+    }).first();
+  }
+
 }
+

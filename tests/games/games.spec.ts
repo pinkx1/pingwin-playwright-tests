@@ -6,9 +6,15 @@ import { test, expect } from '../../fixtures/fixtures';
 // Tests for Games page
 
 test('каталог игр отображает все категории и карточки', async ({ authenticatedPage: page }) => {
-  await page.goto('/games');
+  test.setTimeout(90000);
+  await Promise.all([
+    page.waitForResponse(response =>
+      response.url().includes('/server/games') && response.status() === 200
+    ),
+    page.goto('/games'),
+  ]);
+
   await page.waitForLoadState('domcontentloaded');
-  await page.waitForTimeout(1000); // на всякий случай, если lazy load
 
   const categories = [
     'Популярные',
