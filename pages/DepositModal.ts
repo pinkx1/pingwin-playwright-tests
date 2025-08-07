@@ -36,6 +36,10 @@ export class DepositModal {
     await this.methodsContainer.locator('div.sc-1d93ec92-18').first().waitFor();
   }
 
+  async getPaymentMethodNames(): Promise<string[]> {
+    return this.methodsContainer.locator('div.sc-1d93ec92-18').allTextContents();
+  }
+
   paymentMethodRows(search: string): Locator {
     return this.methodsContainer.locator('> div').filter({ hasText: search });
   }
@@ -56,6 +60,10 @@ export class DepositModal {
 
   get depositButton() {
     return this.dialog.getByRole('button', { name: /Депозит на/ });
+  }
+
+  async getAmountColor(): Promise<string> {
+    return this.amountInput.evaluate((el) => getComputedStyle(el).color);
   }
 
   async getMinDeposit(): Promise<number> {

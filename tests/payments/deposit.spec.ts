@@ -1,106 +1,75 @@
 import { test, expect } from '../../fixtures/fixtures';
+import { Page } from '@playwright/test';
 import { MainPage } from '../../pages/MainPage';
 import { DepositModal } from '../../pages/DepositModal';
 
+const currencies = ['USD', 'EUR', 'UAH', 'KZT', 'RON', 'UZS'];
+const ERROR_COLOR = 'rgb(218, 68, 68)';
+
 test.describe.configure({ mode: 'serial' });
-test.describe('Deposit feature', () => {
-  test.beforeEach(async ({ authenticatedPage: page }) => {
-    const mainPage = new MainPage(page);
-    await mainPage.open();
-    await mainPage.openDepositModal();
-  });
 
+test('Deposit methods limits validation', async ({ authenticatedPage: page }) => {
+  const mainPage = new MainPage(page);
+  await mainPage.open();
+  await mainPage.openDepositModal();
+  const modal = new DepositModal(page);
 
-
-  test('USD deposit limits are correct', async ({ authenticatedPage: page }) => {
-    const modal = new DepositModal(page);
-    await modal.selectCurrency('USD');
-    await modal.waitForPaymentMethods();
-    await verifyAllMethods(modal);
-  });
-
-  test('EUR deposit limits are correct', async ({ authenticatedPage: page }) => {
-    const modal = new DepositModal(page);
-    await modal.selectCurrency('EUR');
-    await modal.waitForPaymentMethods();
-    await verifyAllMethods(modal);
-  });
-
-  test('UAH deposit limits are correct', async ({ authenticatedPage: page }) => {
-    const modal = new DepositModal(page);
-    await modal.selectCurrency('UAH');
-    await modal.waitForPaymentMethods();
-    await verifyAllMethods(modal);
-  });
-
-  test('KZT deposit limits are correct', async ({ authenticatedPage: page }) => {
-    const modal = new DepositModal(page);
-    await modal.selectCurrency('KZT');
-    await modal.waitForPaymentMethods();
-    await verifyAllMethods(modal);
-  });
-
-  test('RON deposit limits are correct', async ({ authenticatedPage: page }) => {
-    const modal = new DepositModal(page);
-    await modal.selectCurrency('RON');
-    await modal.waitForPaymentMethods();
-    await verifyAllMethods(modal);
-  });
-
-  test('UZS deposit limits are correct', async ({ authenticatedPage: page }) => {
-    const modal = new DepositModal(page);
-    await modal.selectCurrency('UZS');
-    await modal.waitForPaymentMethods();
-    await verifyAllMethods(modal);
-  });
+  for (const currency of currencies) {
+    await checkCurrency(page, modal, currency);
+  }
 });
 
-async function verifyLimits(modal: DepositModal) {
-  const min = await modal.getMinDeposit();
-  const max = await modal.getMaxDeposit();
-  await modal.setAmount(min - 1);
-  await expect(modal.depositButton).toBeDisabled();
-  await modal.setAmount(min);
-  await expect(modal.depositButton).toBeEnabled();
-  if (max) {
-    await modal.setAmount(max);
-    await expect(modal.depositButton).toBeEnabled();
-    await modal.setAmount(max + 1);
-    await expect(modal.depositButton).toBeDisabled();
-  }
-}
+async function checkCurrency(page: Page, modal: DepositModal, currency: string) {
+  const convertPromise = page.waitForResponse(r =>
+    r.url().includes('/server/convertBalance') && r.url().includes(`currency=${currency}`)
+  );
+  const balancePromise = page.waitForResponse(r =>
+    r.url().includes('/server/getConvertedBalance')
+  );
+  const methodsPromise = page.waitForResponse(r =>
+    r.url().includes('/server/payment/fiat/payment/methods')
+  );
 
-async function verifyAllMethods(modal: DepositModal) {
-  await verifyMethod(modal, 'Binance Pay');
-  const bankCards = modal.paymentMethodRows('Банковская карта');
-  const count = await bankCards.count();
-  for (let i = 0; i < count; i++) {
-    await bankCards.nth(i).click();
-    await verifyLimits(modal);
+  await modal.selectCurrency(currency);
+
+  const convertResp = await convertPromise;
+  expect(convertResp.status()).toBe(200);
+  const balanceResp = await balancePromise;
+  expect(balanceResp.status()).toBe(200);
+  const methodsResp = await methodsPromise;
+  expect(methodsResp.status()).toBe(200);
+  const data = await methodsResp.json();
+  const methods = data.methods.map((m: any) => ({ name: m.name, min: m.minAmount, max: m.maxAmount }));
+
+  const uiNames = await modal.getPaymentMethodNames();
+  for (const m of methods) {
+    expect(uiNames).toContain(m.name);
+  }
+
+  for (const m of methods) {
+    await modal.openPaymentMethod(m.name);
+    const min = await modal.getMinDeposit();
+    const max = await modal.getMaxDeposit();
+    expect(min).toBe(m.min);
+    expect(max).toBe(m.max);
+
+    await checkAmount(modal, m.min - 1, false);
+    await checkAmount(modal, m.min, true);
+    await checkAmount(modal, m.max, true);
+    await checkAmount(modal, m.max + 1, false);
+
     await modal.goBack();
     await modal.waitForPaymentMethods();
   }
 }
 
-async function verifyMethod(modal: DepositModal, name: string) {
-  const methodRow = modal.paymentMethodRows(name).first();
-  await expect(methodRow).toBeVisible();
-  await methodRow.click();
-  await verifyLimits(modal);
-  await modal.goBack();
-  await modal.waitForPaymentMethods();
-}
-
-async function verifyCryptoMethod(modal: DepositModal, name: string) {
-  const methodRow = modal.paymentMethodRows(name).first();
-  await expect(methodRow).toBeVisible();
-  await methodRow.click();
-  const min = await modal.getMinDeposit();
-  expect(min).toBeGreaterThan(0);
-  const max = await modal.getMaxDeposit();
-  if (max) {
-    expect(max).toBeGreaterThan(min);
+async function checkAmount(modal: DepositModal, value: number, valid: boolean) {
+  await modal.setAmount(value);
+  if (valid) {
+    await expect(modal.depositButton).toBeEnabled();
+    expect(await modal.getAmountColor()).not.toBe(ERROR_COLOR);
+  } else {
+    await expect(modal.depositButton).toBeDisabled();
+    expect(await modal.getAmountColor()).toBe(ERROR_COLOR);
   }
-  await modal.goBack();
-  await modal.waitForPaymentMethods();
 }
