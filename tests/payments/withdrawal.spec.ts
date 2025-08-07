@@ -1,7 +1,6 @@
 import { test, expect } from '../../withdrawalFixtures';
 import { MainPage } from '../../pages/MainPage';
-import { WithdrawalModal } from '../../pages/WithdrawalModal';
-import { withdrawalMethods } from '../../fixtures/data/withdrawalData';
+import { WithdrawalModal, WithdrawalMethod } from '../../pages/WithdrawalModal';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -10,98 +9,80 @@ test.describe('Withdrawal feature', () => {
     const mainPage = new MainPage(page);
     await mainPage.open();
     await mainPage.openDepositModal();
-
     const modal = new WithdrawalModal(page);
     await modal.openWithdrawTab();
   });
 
-  async function runWithdrawalAmountValidation(page, currency: string) {
-    const methods = withdrawalMethods[currency];
+  test('USD withdrawal limits are correct', async ({ authenticatedPage: page }) => {
     const modal = new WithdrawalModal(page);
-
     await modal.openWithdrawTab();
-    await modal.selectCurrency(currency);
 
-    const methodsLocator = modal.dialog.locator('div.sc-90dc3735-3 div.sc-1d93ec92-18');
-    await expect(methodsLocator, `Неверный список способов вывода для валюты: ${currency}`).toHaveText(methods);
+    const methods = await modal.selectCurrencyAndGetMethods('USD');
+    await modal.waitForPaymentMethods(methods.map((m) => m.name));
+    await checkMethods(modal, methods);
+  });
 
-    for (const method of methods) {
-      await page.waitForTimeout(1000);
-      await test.step(`Проверка метода: ${method}`, async () => {
-        await modal.openPaymentMethod(method);
+  test('EUR withdrawal limits are correct', async ({ authenticatedPage: page }) => {
+    const modal = new WithdrawalModal(page);
+    await modal.openWithdrawTab();
 
-        const min = await modal.getMinLimit();
-        const max = await modal.getMaxLimit();
+    const methods = await modal.selectCurrencyAndGetMethods('EUR');
+    await modal.waitForPaymentMethods(methods.map((m) => m.name));
+    await checkMethods(modal, methods);
+  });
 
-        if (min > 0) {
-          const belowMin = min - 1;
-          await modal.setAmount(belowMin);
-          await expect(
-            modal.amountInput,
-            `Ожидался КРАСНЫЙ стиль при вводе значения МЕНЬШЕ минимума: ${belowMin} (${currency}, ${method})`
-          ).toHaveClass(/eTDIAg/);
+  test('UAH withdrawal limits are correct', async ({ authenticatedPage: page }) => {
+    const modal = new WithdrawalModal(page);
+    await modal.openWithdrawTab();
 
-          await expect(
-            modal.amountInput,
-            `Ожидался КРАСНЫЙ цвет текста при значении МЕНЬШЕ минимума: ${belowMin} (${currency}, ${method})`
-          ).toHaveCSS('color', 'rgb(218, 68, 68)');
-        }
+    const methods = await modal.selectCurrencyAndGetMethods('UAH');
+    await modal.waitForPaymentMethods(methods.map((m) => m.name));
+    await checkMethods(modal, methods);
+  });
 
-        await modal.setAmount(min);
-        await expect(
-          modal.amountInput,
-          `Ожидался ЗЕЛЁНЫЙ стиль при вводе значения РАВНОГО минимуму: ${min} (${currency}, ${method})`
-        ).toHaveClass(/jBHWnj/);
+  test('KZT withdrawal limits are correct', async ({ authenticatedPage: page }) => {
+    const modal = new WithdrawalModal(page);
+    await modal.openWithdrawTab();
 
-        await modal.setAmount(max);
-        await expect(
-          modal.amountInput,
-          `Ожидался ЗЕЛЁНЫЙ стиль при вводе значения РАВНОГО максимуму: ${max} (${currency}, ${method})`
-        ).toHaveClass(/jBHWnj/);
+    const methods = await modal.selectCurrencyAndGetMethods('KZT');
+    await modal.waitForPaymentMethods(methods.map((m) => m.name));
+    await checkMethods(modal, methods);
+  });
 
-        const aboveMax = max + 1;
-        await modal.setAmount(aboveMax);
-        await expect(
-          modal.amountInput,
-          `Ожидался КРАСНЫЙ стиль при вводе значения БОЛЬШЕ максимума: ${aboveMax} (${currency}, ${method})`
-        ).toHaveClass(/eTDIAg/);
+  test('RON withdrawal limits are correct', async ({ authenticatedPage: page }) => {
+    const modal = new WithdrawalModal(page);
+    await modal.openWithdrawTab();
 
-        await expect(
-          modal.amountInput,
-          `Ожидался КРАСНЫЙ цвет текста при значении БОЛЬШЕ максимума: ${aboveMax} (${currency}, ${method})`
-        ).toHaveCSS('color', 'rgb(218, 68, 68)');
+    const methods = await modal.selectCurrencyAndGetMethods('RON');
+    await modal.waitForPaymentMethods(methods.map((m) => m.name));
+    await checkMethods(modal, methods);
+  });
 
-        await modal.goBack();
-        await expect(methodsLocator, `Методы после возврата не совпадают с ожидаемыми (${currency})`).toHaveText(methods);
-      });
-    }
-  }
+  test('UZS withdrawal limits are correct', async ({ authenticatedPage: page }) => {
+    const modal = new WithdrawalModal(page);
+    await modal.openWithdrawTab();
 
-
-  test.describe('withdrawal amount validation by currency', () => {
-    test.setTimeout(90000);
-    test('USD', async ({ authenticatedPage: page }) => {
-      await runWithdrawalAmountValidation(page, 'USD');
-    });
-
-    test('EUR', async ({ authenticatedPage: page }) => {
-      await runWithdrawalAmountValidation(page, 'EUR');
-    });
-
-    test('UAH', async ({ authenticatedPage: page }) => {
-      await runWithdrawalAmountValidation(page, 'UAH');
-    });
-
-    test('KZT', async ({ authenticatedPage: page }) => {
-      await runWithdrawalAmountValidation(page, 'KZT');
-    });
-
-    test('RON', async ({ authenticatedPage: page }) => {
-      await runWithdrawalAmountValidation(page, 'RON');
-    });
-
-    test('UZS', async ({ authenticatedPage: page }) => {
-      await runWithdrawalAmountValidation(page, 'UZS');
-    });
+    const methods = await modal.selectCurrencyAndGetMethods('UZS');
+    await modal.waitForPaymentMethods(methods.map((m) => m.name));
+    await checkMethods(modal, methods);
   });
 });
+
+async function checkMethods(modal: WithdrawalModal, methods: WithdrawalMethod[]) {
+  for (const method of methods) {
+    console.log(`\n[DEBUG] Checking method "${method.name}"`);
+    console.log(`[DEBUG] API limits: min=${method.minAmount}, max=${method.maxAmount}`);
+    const row = modal.paymentMethodRows(method.name).first();
+    await expect(row).toBeVisible();
+    await row.click();
+    const min = await modal.getMinLimit();
+    const max = await modal.getMaxLimit();
+    console.log(`[DEBUG] UI limits: min=${min}, max=${max}`);
+
+    expect(min).toBe(method.minAmount);
+    expect(max).toBe(method.maxAmount);
+    await modal.verifyAmountBounds(min, max);
+    await modal.goBack();
+    await modal.waitForPaymentMethods();
+  }
+}
