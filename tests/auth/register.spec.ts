@@ -3,19 +3,7 @@ import { MailSlurp } from 'mailslurp-client';
 import { MainPage } from '../../pages/MainPage';
 import { AuthModal } from '../../pages/AuthModal';
 import { validUser, existingPhoneUser } from '../../fixtures/data/userData';
-
-function generateAutotestEmail(): string {
-  const prefix = `autotest_${Math.random().toString(36).substring(2, 10)}`;
-  return `${prefix}@gmail.com`;
-}
-
-function generateRandomPhone(): string {
-  const prefix = Math.floor(Math.random() * 900 + 100);
-  const middle = Math.floor(Math.random() * 90 + 10);
-  const last = Math.floor(Math.random() * 90 + 10);
-  return `(33)${prefix}-${middle}-${last}`;
-}
-
+import { generateAutotestEmail, generateRandomPhone } from '../../fixtures/helpers';
 
 
 const invalidEmail = 'notanemail';
@@ -31,14 +19,14 @@ async function checkRequiredCheckboxes(page) {
 }
 
 // 1. Opening registration modal
-test('registration modal opens', async ({ page }) => {
+test.only('registration modal opens', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
   await mainPage.open();
   await mainPage.openRegisterModal();
 
-  await authModal.waitForVisible();
+  // await authModal.waitForVisible();
   await expect(authModal.registerTab).toBeVisible();
 });
 

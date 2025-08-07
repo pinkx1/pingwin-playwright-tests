@@ -21,15 +21,6 @@ export class DepositModal {
     this.methodsContainer = this.dialog.locator('div.sc-90dc3735-3');
   }
 
-  async waitForVisible() {
-    await expect(this.dialog).toBeVisible();
-  }
-
-  async close() {
-    await this.closeButton.click();
-    await expect(this.dialog).toBeHidden();
-  }
-
   async selectCurrency(code: string) {
     await this.currencyButton.click();
     await this.page.locator(`.currency-select__option img[src*="/${code}.png"]`).first().click();
@@ -45,24 +36,12 @@ export class DepositModal {
     await this.methodsContainer.locator('div.sc-1d93ec92-18').first().waitFor();
   }
 
-  async getPaymentMethods(): Promise<string[]> {
-    const names = await this.methodsContainer
-      .locator('div.sc-1d93ec92-18')
-      .allTextContents();
-    return names.map(n => n.trim());
-  }
-
   paymentMethodRows(search: string): Locator {
     return this.methodsContainer.locator('> div').filter({ hasText: search });
   }
 
   async openPaymentMethod(name: string) {
     await this.methodsContainer.locator(`text="${name}"`).first().click();
-    await this.dialog.getByText('Назад').waitFor();
-  }
-
-  async openPaymentMethodByText(search: string, index = 0) {
-    await this.paymentMethodRows(search).nth(index).click();
     await this.dialog.getByText('Назад').waitFor();
   }
 

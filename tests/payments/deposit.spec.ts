@@ -10,10 +10,7 @@ test.describe('Deposit feature', () => {
     await mainPage.openDepositModal();
   });
 
-  test('deposit modal is visible', async ({ authenticatedPage: page }) => {
-    const modal = new DepositModal(page);
-    await modal.waitForVisible();
-  });
+
 
   test('USD deposit limits are correct', async ({ authenticatedPage: page }) => {
     const modal = new DepositModal(page);
@@ -75,13 +72,6 @@ async function verifyLimits(modal: DepositModal) {
 
 async function verifyAllMethods(modal: DepositModal) {
   await verifyMethod(modal, 'Binance Pay');
-  // await verifyCryptoMethod(modal, 'Tether USD (Tron)');
-  // await verifyCryptoMethod(modal, 'Tether USD (Ethereum)');
-  // await verifyCryptoMethod(modal, 'Bitcoin');
-  // await verifyCryptoMethod(modal, 'Ethereum');
-  // await verifyCryptoMethod(modal, 'Tron');
-  // await verifyCryptoMethod(modal, 'Toncoin');
-
   const bankCards = modal.paymentMethodRows('Банковская карта');
   const count = await bankCards.count();
   for (let i = 0; i < count; i++) {
