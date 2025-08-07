@@ -13,7 +13,8 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@playwright/test": "^1.54.1",
-		"@types/node": "^24.1.0"
+		"@types/node": "^24.1.0",
+		"dotenv": "^17.2.1"
 	},
 	"dependencies": {
 		"mailslurp-client": "^15.24.2"
