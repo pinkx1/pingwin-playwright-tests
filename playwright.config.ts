@@ -25,20 +25,21 @@ export default defineConfig({
   },
 
   projects: [
-    // {
-    //   name: 'chromium',
-    //   use: {
-    //     ...devices['Desktop Chrome'],
-    //     viewport: { width: 1400, height: 800 },
-    //   },
-    // },
     {
-      name: 'webkit',
+      name: 'chromium',
       use: {
-        ...devices['Desktop Safari'],
+        ...devices['Desktop Chrome'],
         viewport: { width: 1400, height: 800 },
       },
-      timeout: 180_000,
+    },
+    {
+      // name: 'webkit',
+      // use: {
+      //   ...devices['Desktop Safari'],
+      //   viewport: { width: 1400, height: 800 },
+      // },
+      // timeout: 180_000,
+      // fullyParallel: false,
     },
   ],
 });
