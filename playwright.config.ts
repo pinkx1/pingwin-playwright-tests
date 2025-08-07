@@ -17,7 +17,7 @@ export default defineConfig({
     baseURL: 'https://pingwincasino24.com',
     locale: 'ru',
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     headless: true,
     ignoreHTTPSErrors: true,
     screenshot: 'only-on-failure',
