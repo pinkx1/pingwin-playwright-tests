@@ -15,6 +15,8 @@ test.describe('Withdrawal feature', () => {
 
   test('USD withdrawal limits are correct', async ({ authenticatedPage: page }) => {
     const modal = new WithdrawalModal(page);
+    await modal.openWithdrawTab();
+
     const methods = await modal.selectCurrencyAndGetMethods('USD');
     await modal.waitForPaymentMethods(methods.map((m) => m.name));
     await checkMethods(modal, methods);
@@ -22,6 +24,8 @@ test.describe('Withdrawal feature', () => {
 
   test('EUR withdrawal limits are correct', async ({ authenticatedPage: page }) => {
     const modal = new WithdrawalModal(page);
+    await modal.openWithdrawTab();
+
     const methods = await modal.selectCurrencyAndGetMethods('EUR');
     await modal.waitForPaymentMethods(methods.map((m) => m.name));
     await checkMethods(modal, methods);
@@ -29,6 +33,8 @@ test.describe('Withdrawal feature', () => {
 
   test('UAH withdrawal limits are correct', async ({ authenticatedPage: page }) => {
     const modal = new WithdrawalModal(page);
+    await modal.openWithdrawTab();
+
     const methods = await modal.selectCurrencyAndGetMethods('UAH');
     await modal.waitForPaymentMethods(methods.map((m) => m.name));
     await checkMethods(modal, methods);
@@ -36,6 +42,8 @@ test.describe('Withdrawal feature', () => {
 
   test('KZT withdrawal limits are correct', async ({ authenticatedPage: page }) => {
     const modal = new WithdrawalModal(page);
+    await modal.openWithdrawTab();
+
     const methods = await modal.selectCurrencyAndGetMethods('KZT');
     await modal.waitForPaymentMethods(methods.map((m) => m.name));
     await checkMethods(modal, methods);
@@ -43,6 +51,8 @@ test.describe('Withdrawal feature', () => {
 
   test('RON withdrawal limits are correct', async ({ authenticatedPage: page }) => {
     const modal = new WithdrawalModal(page);
+    await modal.openWithdrawTab();
+
     const methods = await modal.selectCurrencyAndGetMethods('RON');
     await modal.waitForPaymentMethods(methods.map((m) => m.name));
     await checkMethods(modal, methods);
@@ -50,6 +60,8 @@ test.describe('Withdrawal feature', () => {
 
   test('UZS withdrawal limits are correct', async ({ authenticatedPage: page }) => {
     const modal = new WithdrawalModal(page);
+    await modal.openWithdrawTab();
+
     const methods = await modal.selectCurrencyAndGetMethods('UZS');
     await modal.waitForPaymentMethods(methods.map((m) => m.name));
     await checkMethods(modal, methods);
@@ -58,11 +70,15 @@ test.describe('Withdrawal feature', () => {
 
 async function checkMethods(modal: WithdrawalModal, methods: WithdrawalMethod[]) {
   for (const method of methods) {
+    console.log(`\n[DEBUG] Checking method "${method.name}"`);
+    console.log(`[DEBUG] API limits: min=${method.minAmount}, max=${method.maxAmount}`);
     const row = modal.paymentMethodRows(method.name).first();
     await expect(row).toBeVisible();
     await row.click();
     const min = await modal.getMinLimit();
     const max = await modal.getMaxLimit();
+    console.log(`[DEBUG] UI limits: min=${min}, max=${max}`);
+
     expect(min).toBe(method.minAmount);
     expect(max).toBe(method.maxAmount);
     await modal.verifyAmountBounds(min, max);
