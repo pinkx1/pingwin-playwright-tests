@@ -1,4 +1,10 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
+
+export interface WithdrawalMethod {
+  name: string;
+  minAmount: number;
+  maxAmount: number;
+}
 
 export class WithdrawalModal {
   readonly page: Page;
@@ -8,6 +14,7 @@ export class WithdrawalModal {
   readonly depositTab: Locator;
   readonly withdrawTab: Locator;
   readonly historyTab: Locator;
+  readonly methodsContainer: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -17,6 +24,7 @@ export class WithdrawalModal {
     this.depositTab = this.dialog.getByRole('button', { name: 'Депозит' });
     this.withdrawTab = this.dialog.getByRole('button', { name: 'Вывод' });
     this.historyTab = this.dialog.getByRole('button', { name: 'История' });
+    this.methodsContainer = this.dialog.locator('div.sc-90dc3735-3');
   }
   async openWithdrawTab() {
     await this.withdrawTab.click();
@@ -27,20 +35,61 @@ export class WithdrawalModal {
 
   async selectCurrency(code: string) {
     await this.currencyButton.click();
-    await this.page.locator(`.currency-select__option img[src*="/${code}.png"]`).first().click();
+    await this.page
+      .locator(`.currency-select__option img[src*="/${code}.png"]`)
+      .first()
+      .click();
+  }
+
+  async selectCurrencyAndGetMethods(code: string): Promise<WithdrawalMethod[]> {
+    await this.currencyButton.click();
+    const option = this.page
+      .locator(`.currency-select__option img[src*="/${code}.png"]`)
+      .first();
+    const [methodsResponse] = await Promise.all([
+      this.page.waitForResponse(
+        (res) =>
+          res.url().includes('/payment/fiat/payout/methods') &&
+          res.status() === 200
+      ),
+      this.page.waitForResponse(
+        (res) =>
+          res
+            .url()
+            .includes(`/convertBalance?currency=${code}`) &&
+          res.status() === 200
+      ),
+      this.page.waitForResponse(
+        (res) =>
+          res.url().includes('/getConvertedBalance') && res.status() === 200
+      ),
+      option.click(),
+    ]);
+    const json = await methodsResponse.json();
+    await this.waitForPaymentMethods();
+    return json.methods.map((m: any) => ({
+      name: m.name,
+      minAmount: m.minAmount,
+      maxAmount: m.maxAmount,
+    }));
+  }
+
+  async waitForPaymentMethods(expected?: string[]) {
+    const rows = this.methodsContainer.locator('div.sc-1d93ec92-18');
+    if (expected) {
+      await expect(rows).toHaveText(expected);
+      return;
+    }
+    await rows.first().waitFor();
+  }
+
+  paymentMethodRows(search: string): Locator {
+    return this.methodsContainer.locator('> div').filter({ hasText: search });
   }
 
   async openPaymentMethod(name: string) {
-    const method = this.dialog
-      .locator('div.sc-90dc3735-3')
-      .locator(`text="${name}"`)
-      .first();
-    await method.click();
-    await this.dialog
-      .getByText('Минимальная сумма вывода:')
-      .locator('xpath=../div[2]')
-      .waitFor();
-    await this.dialog.getByText('Макс.').locator('xpath=../div[1]').waitFor();
+    await this.methodsContainer.locator(`text="${name}"`).first().click();
+    await this.dialog.getByText('Назад').waitFor();
   }
 
   async goBack() {
@@ -55,6 +104,30 @@ export class WithdrawalModal {
   async setAmount(value: number) {
     const digitsOnly = String(value).replace(/[^\d]/g, '');
     await this.amountInput.fill(digitsOnly);
+  }
+
+  async expectInvalidAmount(value: number) {
+    await this.setAmount(value);
+    await expect(this.amountInput).toHaveCSS('color', 'rgb(218, 68, 68)');
+  }
+
+  async expectValidAmount(value: number) {
+    await this.setAmount(value);
+    await expect(this.amountInput).not.toHaveCSS(
+      'color',
+      'rgb(218, 68, 68)'
+    );
+  }
+
+  async verifyAmountBounds(min: number, max: number) {
+    const belowMin = min > 1 ? min - 1 : min / 2;
+    await this.expectInvalidAmount(belowMin);
+    await this.expectValidAmount(min);
+    if (max) {
+      await this.expectValidAmount(max);
+      const aboveMax = max > 1 ? max + 1 : max * 2;
+      await this.expectInvalidAmount(aboveMax);
+    }
   }
 
   private parseAmount(text: string): number {
