@@ -1,4 +1,4 @@
-import { test, expect } from '../../withdrawalFixtures';
+import { test, expect } from '../../fixtures/withdrawalFixtures';
 import { MainPage } from '../../pages/MainPage';
 import { WithdrawalModal, WithdrawalMethod } from '../../pages/WithdrawalModal';
 
@@ -70,14 +70,11 @@ test.describe('Withdrawal feature', () => {
 
 async function checkMethods(modal: WithdrawalModal, methods: WithdrawalMethod[]) {
   for (const method of methods) {
-    console.log(`\n[DEBUG] Checking method "${method.name}"`);
-    console.log(`[DEBUG] API limits: min=${method.minAmount}, max=${method.maxAmount}`);
     const row = modal.paymentMethodRows(method.name).first();
     await expect(row).toBeVisible();
     await row.click();
     const min = await modal.getMinLimit();
     const max = await modal.getMaxLimit();
-    console.log(`[DEBUG] UI limits: min=${min}, max=${max}`);
 
     expect(min).toBe(method.minAmount);
     expect(max).toBe(method.maxAmount);
