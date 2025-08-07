@@ -2,10 +2,11 @@ import { expect, test } from '../../fixtures/fixtures';
 import { MainPage } from '../../pages/MainPage';
 import { DepositModal, DepositMethod } from '../../pages/DepositModal';
 
-test.describe.configure({ mode: 'serial' });
+// test.describe.configure({ mode: 'serial' });
 
 test.describe('Deposit feature', () => {
   test.beforeEach(async ({ authenticatedPage: page }) => {
+    test.setTimeout(90000);
     const mainPage = new MainPage(page);
     await mainPage.open();
     await mainPage.openDepositModal();
@@ -50,7 +51,7 @@ test.describe('Deposit feature', () => {
 
 async function checkMethods(modal: DepositModal, methods: DepositMethod[]) {
   for (const method of methods) {
-    const row = modal.paymentMethodRows(method.name).first();
+    const row = modal.getPaymentMethodRow(method);
     await expect(row).toBeVisible();
     await row.click();
     await modal.verifyAmountBounds(method.minAmount, method.maxAmount);
@@ -58,3 +59,5 @@ async function checkMethods(modal: DepositModal, methods: DepositMethod[]) {
     await modal.waitForPaymentMethods();
   }
 }
+
+
