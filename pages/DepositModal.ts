@@ -72,6 +72,8 @@ export class DepositModal {
       await primaryLabel.waitFor();
       const primary = primaryLabel.locator('..').locator('.sc-1d93ec92-19');
       const text = await primary.first().textContent();
+      console.log('[UI] Min deposit (primary label):', text);
+
       return this.parseAmount(text || '');
     }
     const altLabel = this.dialog.getByText('Минимальная сумма пополнения');
@@ -79,12 +81,16 @@ export class DepositModal {
       await altLabel.waitFor();
       const alt = altLabel.locator('..').locator('.sc-1d93ec92-19');
       const text = await alt.first().textContent();
+      console.log('[UI] Min deposit (alt label):', text);
+
       return this.parseAmount(text || '');
     }
     const secondaryAlt = this.dialog.getByText('Минимальная сумма депозита');
     await secondaryAlt.waitFor();
     const secondary = secondaryAlt.locator('..').locator('.sc-1d93ec92-19');
     const text = await secondary.first().textContent();
+    console.log('[UI] Min deposit (secondary alt label):', text);
+
     return this.parseAmount(text || '');
   }
 
@@ -94,6 +100,9 @@ export class DepositModal {
       await primaryLabel.waitFor();
       const primary = primaryLabel.locator('..').locator('.sc-1d93ec92-19');
       const text = await primary.first().textContent();
+      console.log('[UI] Max deposit (primary label):', text);
+
+
       return this.parseAmount(text || '');
     }
     const altLabel = this.dialog.getByText('Максимальний депозит');
@@ -101,6 +110,8 @@ export class DepositModal {
       await altLabel.waitFor();
       const alt = altLabel.locator('..').locator('.sc-1d93ec92-19');
       const text = await alt.first().textContent();
+      console.log('[UI] Max deposit (alt label):', text);
+
       return this.parseAmount(text || '');
     }
     const anotherLabel = this.dialog.getByText('Максимальная сумма пополнения');
@@ -108,6 +119,8 @@ export class DepositModal {
       await anotherLabel.waitFor();
       const another = anotherLabel.locator('..').locator('.sc-1d93ec92-19');
       const text = await another.first().textContent();
+      console.log('[UI] Max deposit (another label):', text);
+
       return this.parseAmount(text || '');
     }
     return null;
@@ -121,4 +134,12 @@ export class DepositModal {
     const normalized = text.replace(/\s/g, '').replace(/,/g, '').replace(/[^0-9.]/g, '');
     return parseFloat(normalized);
   }
+  async openPaymentMethodByIndex(index: number) {
+    const method = this.methodsContainer.locator('> div').nth(index);
+    const title = await method.textContent();
+    console.log(`[DEBUG] Clicking method[${index}]: ${title?.trim()}`);
+    await method.click();
+    await this.dialog.getByText('Назад').waitFor();
+  }
+
 }

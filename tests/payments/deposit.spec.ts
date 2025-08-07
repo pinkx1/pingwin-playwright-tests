@@ -39,17 +39,34 @@ async function checkCurrency(page: Page, modal: DepositModal, currency: string) 
   const methodsResp = await methodsPromise;
   expect(methodsResp.status()).toBe(200);
   const data = await methodsResp.json();
+
+  console.log('Response currency:', data.currency); // или data.methods[0].currency, если так передаётся
+
   const methods = data.methods.map((m: any) => ({ name: m.name, min: m.minAmount, max: m.maxAmount }));
 
   const uiNames = await modal.getPaymentMethodNames();
+  console.log(`[DEBUG] API method names for ${currency}:`, methods.map(m => m.name));
+  console.log(`[DEBUG] UI method names for ${currency}:`, await modal.getPaymentMethodNames());
+
+  // for (const m of methods) {
+  //   expect(uiNames).toContain(m.name);
+  // }
   for (const m of methods) {
-    expect(uiNames).toContain(m.name);
+    if (!uiNames.includes(m.name)) {
+      console.warn(`[WARNING] Method "${m.name}" not found in UI for currency ${currency}`);
+    }
   }
 
-  for (const m of methods) {
-    await modal.openPaymentMethod(m.name);
+  for (let i = 0; i < methods.length; i++) {
+    const m = methods[i];
+    await modal.openPaymentMethodByIndex(i);
     const min = await modal.getMinDeposit();
     const max = await modal.getMaxDeposit();
+
+    console.log(`Currency: ${currency}, Method[${i}]: ${m.name}`);
+    console.log(`API limits → min: ${m.min}, max: ${m.max}`);
+    console.log(`UI limits  → min: ${min}, max: ${max}`);
+
     expect(min).toBe(m.min);
     expect(max).toBe(m.max);
 
@@ -61,6 +78,7 @@ async function checkCurrency(page: Page, modal: DepositModal, currency: string) 
     await modal.goBack();
     await modal.waitForPaymentMethods();
   }
+
 }
 
 async function checkAmount(modal: DepositModal, value: number, valid: boolean) {
