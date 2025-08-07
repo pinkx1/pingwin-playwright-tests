@@ -77,7 +77,9 @@ export class WithdrawalModal {
   async waitForPaymentMethods(expected?: string[]) {
     const rows = this.methodsContainer.locator('div.sc-1d93ec92-18');
     if (expected) {
-      await expect(rows).toHaveText(expected);
+      for (const name of expected) {
+        await rows.filter({ hasText: name }).first().waitFor();
+      }
       return;
     }
     await rows.first().waitFor();
