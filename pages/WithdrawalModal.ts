@@ -75,12 +75,10 @@ export class WithdrawalModal {
   }
 
   async waitForPaymentMethods(expected?: string[]) {
-    console.log(`[DEBUG] Waiting for payment methods:`, expected);
 
     const rows = this.methodsContainer.locator('div.sc-1d93ec92-18');
     if (expected) {
       for (const name of expected) {
-        console.log(`[DEBUG] → waiting for method "${name}"`);
 
         await rows.filter({ hasText: name }).first().waitFor();
       }
@@ -110,21 +108,18 @@ export class WithdrawalModal {
   async setAmount(value: number) {
     const valueStr = value.toString(); // без .replace
     await this.amountInput.fill(valueStr);
-    console.log(`[DEBUG] setAmount(${value}) → filled "${valueStr}"`);
   }
 
 
   async expectInvalidAmount(value: number) {
     await this.setAmount(value);
     const actualColor = await this.amountInput.evaluate(el => getComputedStyle(el).color);
-    console.log(`[DEBUG] expectInvalidAmount(${value}) → color: ${actualColor}`);
     await expect(this.amountInput).toHaveCSS('color', 'rgb(218, 68, 68)');
   }
 
   async expectValidAmount(value: number) {
     await this.setAmount(value);
     const actualColor = await this.amountInput.evaluate(el => getComputedStyle(el).color);
-    console.log(`[DEBUG] expectValidAmount(${value}) → color: ${actualColor}`);
     await expect(this.amountInput).not.toHaveCSS(
       'color',
       'rgb(218, 68, 68)'
@@ -133,7 +128,6 @@ export class WithdrawalModal {
 
   async verifyAmountBounds(min: number, max: number) {
     const belowMin = min > 1 ? min - 1 : min / 2;
-    console.log(`[DEBUG] Verifying amount bounds: min=${min}, max=${max}, belowMin=${belowMin}, aboveMax=${max > 1 ? max + 1 : max * 2}`);
 
     await this.expectInvalidAmount(belowMin);
     await this.expectValidAmount(min);
