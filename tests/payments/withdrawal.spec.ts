@@ -1,7 +1,7 @@
 import { test, expect } from '../../withdrawalFixtures';
 import { MainPage } from '../../pages/MainPage';
 import { WithdrawalModal } from '../../pages/WithdrawalModal';
-import { withdrawalMethods } from '../../fixtures/withdrawalData';
+import { withdrawalMethods } from '../../fixtures/data/withdrawalData';
 
 test.describe.configure({ mode: 'serial' });
 

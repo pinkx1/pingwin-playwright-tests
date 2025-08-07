@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures';
+import { test, expect } from '../../fixtures/fixtures';
 
 test('страница кешбэка открывается', async ({ authenticatedPage: page }) => {
   await page.goto('/cashback');
