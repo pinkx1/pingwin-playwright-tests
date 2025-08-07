@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { MainPage } from '../../pages/MainPage';
 import { AuthModal } from '../../pages/AuthModal';
-import { validUser, existingPhoneUser } from '../../fixtures/userData';
+import { validUser, existingPhoneUser } from '../../fixtures/data/userData';
 
 const invalidEmail = 'notanemail';
 const nonExistingEmail = `no_user_${Math.random().toString(36).slice(2, 8)}@example.com`;

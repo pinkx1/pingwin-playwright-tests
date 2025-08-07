@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { MailSlurp } from 'mailslurp-client';
 import { MainPage } from '../../pages/MainPage';
 import { AuthModal } from '../../pages/AuthModal';
-import { validUser, existingPhoneUser } from '../../fixtures/userData';
+import { validUser, existingPhoneUser } from '../../fixtures/data/userData';
 
 function generateAutotestEmail(): string {
   const prefix = `autotest_${Math.random().toString(36).substring(2, 10)}`;

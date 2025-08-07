@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures';
+import { test, expect } from '../../fixtures/fixtures';
 
 // Тесты локализации главной страницы
 // Проверяем, что при переключении языка текст кнопки депозита меняется
