@@ -1,5 +1,11 @@
 import { Page, Locator, expect } from '@playwright/test';
 
+export interface DepositMethod {
+  name: string;
+  minAmount: number;
+  maxAmount: number;
+}
+
 export class DepositModal {
   readonly page: Page;
   readonly dialog: Locator;
@@ -23,7 +29,42 @@ export class DepositModal {
 
   async selectCurrency(code: string) {
     await this.currencyButton.click();
-    await this.page.locator(`.currency-select__option img[src*="/${code}.png"]`).first().click();
+    await this.page
+      .locator(`.currency-select__option img[src*="/${code}.png"]`)
+      .first()
+      .click();
+  }
+
+  async selectCurrencyAndGetMethods(code: string): Promise<DepositMethod[]> {
+    await this.currencyButton.click();
+    const option = this.page
+      .locator(`.currency-select__option img[src*="/${code}.png"]`)
+      .first();
+    const [methodsResponse] = await Promise.all([
+      this.page.waitForResponse(
+        (res) =>
+          res.url().includes('/payment/fiat/payment/methods') &&
+          res.status() === 200
+      ),
+      this.page.waitForResponse(
+        (res) =>
+          res
+            .url()
+            .includes(`/convertBalance?currency=${code}`) && res.status() === 200
+      ),
+      this.page.waitForResponse(
+        (res) =>
+          res.url().includes('/getConvertedBalance') && res.status() === 200
+      ),
+      option.click(),
+    ]);
+    const json = await methodsResponse.json();
+    await this.waitForPaymentMethods();
+    return json.methods.map((m: any) => ({
+      name: m.name,
+      minAmount: m.minAmount,
+      maxAmount: m.maxAmount,
+    }));
   }
 
   async waitForPaymentMethods(expected?: string[]) {
@@ -107,6 +148,32 @@ export class DepositModal {
 
   async setAmount(value: number) {
     await this.amountInput.fill(String(value));
+  }
+
+  async expectInvalidAmount(value: number) {
+    await this.setAmount(value);
+    await expect(this.depositButton).toBeDisabled();
+    await expect(this.amountInput).toHaveCSS('color', 'rgb(218, 68, 68)');
+  }
+
+  async expectValidAmount(value: number) {
+    await this.setAmount(value);
+    await expect(this.depositButton).toBeEnabled();
+    await expect(this.amountInput).not.toHaveCSS(
+      'color',
+      'rgb(218, 68, 68)'
+    );
+  }
+
+  async verifyAmountBounds(min: number, max: number) {
+    const belowMin = min > 1 ? min - 1 : min / 2;
+    await this.expectInvalidAmount(belowMin);
+    await this.expectValidAmount(min);
+    if (max) {
+      await this.expectValidAmount(max);
+      const aboveMax = max > 1 ? max + 1 : max * 2;
+      await this.expectInvalidAmount(aboveMax);
+    }
   }
 
   private parseAmount(text: string): number {
