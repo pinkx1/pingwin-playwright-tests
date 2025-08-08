@@ -8,33 +8,32 @@ const nonExistingEmail = `no_user_${Math.random().toString(36).slice(2, 8)}@exam
 
 // ----------------------- Позитивные сценарии -----------------------
 
-// 1. Успешный вход по почте с переходом в профиль
-test('user can login with email and access profile', async ({ page }) => {
-
+test('Успешный вход по почте с переходом в профиль', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
   await mainPage.open();
   await mainPage.openLoginModal();
   await authModal.login(validUser.email, validUser.password);
-  // Попытка найти хотя бы одно уведомление (без падения, если не нашлось)
+
   const toastList = page.locator('ol.sc-afd14a6a-1.fJlNeS > li');
   const isToastVisible = await toastList.first().isVisible().catch(() => false);
 
-  // Если есть хотя бы одно — ждём, пока все исчезнут
   if (isToastVisible) {
-    await expect(toastList).toHaveCount(0, { timeout: 5000 });
+    await expect(toastList, 'Ожидалось: уведомления исчезнут, но они остались на странице.')
+      .toHaveCount(0, { timeout: 5000 });
   }
-
 
   await page.getByRole('link', { name: /avatar/i }).click({ force: true });
   await page.waitForLoadState('load');
+
   const emailInput = page.getByPlaceholder('Ваша почта');
-  await expect(emailInput).toHaveValue(validUser.email);
+  const actualEmail = await emailInput.inputValue();
+  await expect(emailInput, `Ожидалось: ${validUser.email}, но получили: ${actualEmail}`)
+    .toHaveValue(validUser.email);
 });
 
-// 2. Успешный вход по телефону с переходом в профиль
-test('user can login with phone and access profile', async ({ page }) => {
+test('Успешный вход по телефону с переходом в профиль', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
@@ -46,21 +45,24 @@ test('user can login with phone and access profile', async ({ page }) => {
 
   await page.getByRole('link', { name: /avatar/i }).click({ force: true });
   await page.waitForLoadState('load');
+
   const phoneInput = page.locator('#phone-input input[name="phone"]');
-  await expect(phoneInput).toHaveValue(existingPhoneUser.phone);
+  const actualPhone = await phoneInput.inputValue();
+  await expect(phoneInput, `Ожидалось: ${existingPhoneUser.phone}, но получили: ${actualPhone}`)
+    .toHaveValue(existingPhoneUser.phone);
 });
 
-// 3. Токен сессии сохраняется после входа
-test('session token is stored after login', async ({ page }) => {
+test('Токен сессии сохраняется после входа', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
   await mainPage.open();
   const before = await page.context().cookies();
-
-  // Убедиться, что cookie sessionId отсутствует до входа или пустая
   const sessionBefore = before.find(c => c.name === 'sessionId');
-  expect(sessionBefore?.value ?? '').toBe('');
+  const actualBefore = sessionBefore?.value ?? '';
+
+  expect(actualBefore, `Ожидалось: пустой sessionId до входа, но получили: ${actualBefore}`)
+    .toBe('');
 
   await mainPage.openLoginModal();
   await authModal.login(validUser.email, validUser.password);
@@ -69,26 +71,25 @@ test('session token is stored after login', async ({ page }) => {
     .poll(async () => {
       const cookies = await page.context().cookies();
       return cookies.find(c => c.name === 'sessionId')?.value;
+    }, {
+      message: 'Ожидалось: sessionId будет установлен после входа, но он отсутствует или пуст.'
     })
     .toBeTruthy();
 });
 
-// 4. Открытие формы входа меняет URL
-test('login modal opens with correct url', async ({ page }) => {
+test('Открытие формы входа меняет URL', async ({ page }) => {
   const mainPage = new MainPage(page);
-  const authModal = new AuthModal(page);
-
   await mainPage.open();
   await mainPage.openLoginModal();
-  // await authModal.waitForVisible();
 
-  await expect(page).toHaveURL(/\/ru\?modal=auth/);
+  const actualUrl = page.url();
+  await expect(page, `Ожидалось: URL содержит "/ru?modal=auth", но получили: ${actualUrl}`)
+    .toHaveURL(/\/ru\?modal=auth/);
 });
 
 // ----------------------- Негативные сценарии -----------------------
 
-// 6. Вход с несуществующим email
-test('login fails with non-existing email', async ({ page }) => {
+test('Вход с несуществующим email', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
@@ -97,11 +98,12 @@ test('login fails with non-existing email', async ({ page }) => {
   await authModal.login(nonExistingEmail, validUser.password);
 
   const errorToast = page.locator('li[role="status"]');
-  await expect(errorToast).toBeVisible();
+  const visible = await errorToast.isVisible().catch(() => false);
+  await expect(errorToast, `Ожидалось: уведомление об ошибке будет видно, но получили: ${visible ? 'видно' : 'не видно'}`)
+    .toBeVisible();
 });
 
-// 7. Вход с неверным паролем
-test('login fails with wrong password', async ({ page }) => {
+test('Вход с неверным паролем', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
@@ -110,11 +112,12 @@ test('login fails with wrong password', async ({ page }) => {
   await authModal.login(validUser.email, 'WrongPassword123');
 
   const errorToast = page.locator('li[role="status"]');
-  await expect(errorToast).toBeVisible();
+  const visible = await errorToast.isVisible().catch(() => false);
+  await expect(errorToast, `Ожидалось: уведомление об ошибке будет видно, но получили: ${visible ? 'видно' : 'не видно'}`)
+    .toBeVisible();
 });
 
-// 8. Нельзя войти без email
-test('cannot login without email', async ({ page }) => {
+test('Нельзя войти без email', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
@@ -125,12 +128,16 @@ test('cannot login without email', async ({ page }) => {
   await authModal.emailInput.focus();
   await authModal.emailInput.blur();
 
-  await expect(authModal.emailError).toBeVisible();
-  await expect(authModal.submitButton).toBeDisabled();
+  const isErrorVisible = await authModal.emailError.isVisible();
+  await expect(authModal.emailError, `Ожидалось: ошибка email будет видна, но получили: ${isErrorVisible ? 'видна' : 'не видна'}`)
+    .toBeVisible();
+
+  const isDisabled = await authModal.submitButton.isDisabled();
+  await expect(authModal.submitButton, `Ожидалось: кнопка будет неактивна, но получили: ${isDisabled ? 'неактивна' : 'активна'}`)
+    .toBeDisabled();
 });
 
-// 9. Невалидный email отклоняется
-test('invalid email is rejected', async ({ page }) => {
+test('Невалидный email отклоняется', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
@@ -141,12 +148,16 @@ test('invalid email is rejected', async ({ page }) => {
   await authModal.passwordInput.fill(validUser.password);
   await authModal.emailInput.blur();
 
-  await expect(authModal.emailError).toBeVisible();
-  await expect(authModal.submitButton).toBeDisabled();
+  const isErrorVisible = await authModal.emailError.isVisible();
+  await expect(authModal.emailError, `Ожидалось: ошибка email будет видна, но получили: ${isErrorVisible ? 'видна' : 'не видна'}`)
+    .toBeVisible();
+
+  const isDisabled = await authModal.submitButton.isDisabled();
+  await expect(authModal.submitButton, `Ожидалось: кнопка будет неактивна, но получили: ${isDisabled ? 'неактивна' : 'активна'}`)
+    .toBeDisabled();
 });
 
-// 10. Нельзя войти по телефону без номера
-test('cannot login by phone without phone number', async ({ page }) => {
+test('Нельзя войти по телефону без номера', async ({ page }) => {
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
@@ -158,6 +169,11 @@ test('cannot login by phone without phone number', async ({ page }) => {
   await authModal.phoneInput.focus();
   await authModal.phoneInput.blur();
 
-  await expect(authModal.phoneError).toBeVisible();
-  await expect(authModal.submitButton).toBeDisabled();
+  const isErrorVisible = await authModal.phoneError.isVisible();
+  await expect(authModal.phoneError, `Ожидалось: ошибка номера будет видна, но получили: ${isErrorVisible ? 'видна' : 'не видна'}`)
+    .toBeVisible();
+
+  const isDisabled = await authModal.submitButton.isDisabled();
+  await expect(authModal.submitButton, `Ожидалось: кнопка будет неактивна, но получили: ${isDisabled ? 'неактивна' : 'активна'}`)
+    .toBeDisabled();
 });
