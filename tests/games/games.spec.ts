@@ -1,10 +1,5 @@
 import { test, expect } from '../../fixtures/users/basicUser.fixture';
 
-// Все тесты в этом файле используют authenticatedPage,
-// поэтому логин выполняется один раз в beforeAll фикстуры.
-
-// Tests for Games page
-
 test('каталог игр отображает все категории и карточки', async ({ authenticatedPage: page }) => {
   test.setTimeout(90000);
   await Promise.all([
@@ -59,10 +54,7 @@ test('каталог игр отображает все категории и к
       const hrefs = await card.locator('a').evaluateAll(anchors =>
         anchors.map(a => a.getAttribute('href')).filter(href => href && href.includes('/games/'))
       );
-
       expect(hrefs.length, `В карточке #${i + 1} категории "${categoryName}" нет ссылки на игру`).toBeGreaterThan(0);
-
-
     }
   }
 });
@@ -123,8 +115,6 @@ test('provider filter works', async ({ authenticatedPage: page }) => {
   expect(filteredCount, 'Ожидалось, что Magic Apple не попадёт в результат фильтрации по провайдеру').toBe(0);
 });
 
-
-
 // Launch games and check that game URLs load successfully
 const launchGames = [
   'Hot Fruits',
@@ -182,12 +172,6 @@ for (const game of launchGames) {
     } catch (err) {
       throw err;
     }
-    ///
-    ///
-
-
-
-
     const response = await page.request.get(gameSrc!);
     expect(response.ok(), `Загрузка игры ${game} вернула статус ${response.status()}`).toBeTruthy();
   });
