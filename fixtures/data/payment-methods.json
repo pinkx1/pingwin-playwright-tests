@@ -24,7 +24,7 @@
       "method": "46",
       "name": "Binance Pay",
       "minAmount": 3,
-      "maxAmount": 4295,
+      "maxAmount": 4296,
       "icon": "/assets/images/payment/binance.svg",
       "fields": []
     },
@@ -109,7 +109,7 @@
       "method": "46",
       "name": "Binance Pay",
       "minAmount": 14,
-      "maxAmount": 21772,
+      "maxAmount": 21777,
       "icon": "/assets/images/payment/binance.svg",
       "fields": []
     },
@@ -127,7 +127,7 @@
       "method": "50",
       "name": "Банковская карта (от €6)",
       "minAmount": 31,
-      "maxAmount": 50695,
+      "maxAmount": 50696,
       "icon": "/assets/images/payment/card3.svg",
       "fields": [
         "fullForm",

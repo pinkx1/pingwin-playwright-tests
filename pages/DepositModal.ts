@@ -184,17 +184,14 @@ export class DepositModal {
   }
 
   async fillAndSubmitAdditionalForm(data: Record<string, string>): Promise<Response | null> {
-    console.log('[DEBUG] Waiting for form...');
     const form = this.dialog.locator('form').last();
     await form.waitFor();
-    console.log('[DEBUG] Form appeared');
 
     // Дать фронту время автозаполнить поля, если такое есть
     await this.page.waitForTimeout(500);
 
     const inputs = form.locator('input');
     const inputCount = await inputs.count();
-    console.log(`[DEBUG] Found ${inputCount} inputs`);
 
     for (let i = 0; i < inputCount; i++) {
       const input = inputs.nth(i);
@@ -206,13 +203,11 @@ export class DepositModal {
       if (targetValue === undefined) continue;
 
       const currentValue = await input.inputValue();
-      console.log(`[DEBUG] [${name}] current="${currentValue}" target="${targetValue}"`);
 
       if (currentValue !== targetValue) {
         await input.click(); // иногда требуется для активации
         await input.fill(targetValue);
         await input.evaluate(el => (el as HTMLElement).blur());
-        console.log(`[DEBUG] [${name}] filled`);
         await this.page.waitForTimeout(50);
       }
     }
@@ -220,7 +215,6 @@ export class DepositModal {
     // Заполнение <select>
     const selects = form.locator('select');
     const selectCount = await selects.count();
-    console.log(`[DEBUG] Found ${selectCount} selects`);
 
     for (let i = 0; i < selectCount; i++) {
       const select = selects.nth(i);
@@ -230,20 +224,17 @@ export class DepositModal {
         const optionValue = await options[indexToSelect].getAttribute('value');
         if (optionValue) {
           await select.selectOption(optionValue);
-          console.log(`[DEBUG] [select#${i}] selected "${optionValue}"`);
         }
       }
     }
 
     const submit = form.locator('button[type="submit"]').first();
-    console.log('[DEBUG] Clicking submit button');
 
     const [response] = await Promise.all([
       this.page.waitForNavigation({ waitUntil: 'load' }).catch(() => null),
       submit.click({ force: true, noWaitAfter: true }),
     ]);
 
-    console.log('[DEBUG] Submit clicked, navigation status:', response?.status());
     return response;
   }
 

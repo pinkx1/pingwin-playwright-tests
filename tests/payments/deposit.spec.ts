@@ -94,7 +94,6 @@ async function checkRedirects(page: Page, currency: string) {
 
       if (isDialogVisible) {
         page.on('console', msg => {
-          console.log(`[BROWSER LOG] ${msg.type()}: ${msg.text()}`);
         });
         const response = await modal.fillAndSubmitAdditionalForm(paymentData);
         if (!response) {
