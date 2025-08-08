@@ -209,21 +209,36 @@ test('new user can register and access profile', async ({ page }) => {
 
   await mainPage.open();
   await mainPage.openRegisterModal();
-  await authModal.register(email, password);
 
+  // Ждем ответ от запроса регистрации
+  const [registerResponse] = await Promise.all([
+    page.waitForResponse(res =>
+      res.url().includes('/server/register') &&
+      res.status() === 200
+    ),
+    authModal.register(email, password),
+  ]);
+
+  // Проверяем тело ответа
+  const responseBody = await registerResponse.json();
+  expect(responseBody).toHaveProperty('token');
+  expect(typeof responseBody.token).toBe('string');
+  expect(responseBody.token.length).toBeGreaterThan(10);
+  expect(responseBody).toHaveProperty('expired', 31536000);
+
+  // Продолжаем тест UI
   await page.locator('img[src*="email-spin.svg"]').waitFor({ state: 'visible', timeout: 4000 });
   await page.waitForLoadState('domcontentloaded');
   await page.waitForSelector('a[href="/ru/profile"]');
 
   await authModal.closeEmailConfirmationIfVisible();
   await page.locator('a[href="/ru/profile"]').click({ force: true });
-  // await page.goto('/ru/profile');
   await page.waitForLoadState('load');
-
 
   const emailInput = page.getByPlaceholder('Ваша почта');
   await expect(emailInput).toHaveValue(email);
 });
+
 
 // 13. Successful registration by phone
 test('new user can register by phone', async ({ page }) => {
@@ -339,7 +354,7 @@ test('email confirmation removes confirm button', async ({ page }) => {
 
   await page.locator('a[href="/ru/profile"]').waitFor({ state: 'visible' });
   await page.locator('a[href="/ru/profile"]').click();
-  await page.goto('/ru/profile');
+  // await page.goto('/ru/profile');
   await page.waitForLoadState('domcontentloaded');
   await expect(page.getByPlaceholder('Ваша почта')).toBeVisible();
 
