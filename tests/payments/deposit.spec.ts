@@ -110,7 +110,7 @@ async function handleMethod(
     method.minAmount + 1,
     method.maxAmount ? method.maxAmount - 1 : method.minAmount + 1
   );
-  await modal.openPaymentMethod(method.name);
+  await modal.openPaymentMethod(method);
   await modal.setAmount(amount);
 
   if (method.fields?.includes('fullForm')) {
