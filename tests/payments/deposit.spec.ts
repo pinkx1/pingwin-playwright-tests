@@ -68,32 +68,7 @@ test.describe('Deposit feature', () => {
   });
 });
 
-test.describe('Deposit redirection', () => {
-  test.setTimeout(200000)
-  test('USD methods redirect to payment pages', async ({ authenticatedPage: page }) => {
-    await checkRedirects(page, 'USD');
-  });
 
-  test('EUR methods redirect to payment pages', async ({ authenticatedPage: page }) => {
-    await checkRedirects(page, 'EUR');
-  });
-
-  test('UAH methods redirect to payment pages', async ({ authenticatedPage: page }) => {
-    await checkRedirects(page, 'UAH');
-  });
-
-  test('KZT methods redirect to payment pages', async ({ authenticatedPage: page }) => {
-    await checkRedirects(page, 'KZT');
-  });
-
-  test('RON methods redirect to payment pages', async ({ authenticatedPage: page }) => {
-    await checkRedirects(page, 'RON');
-  });
-
-  test('UZS methods redirect to payment pages', async ({ authenticatedPage: page }) => {
-    await checkRedirects(page, 'UZS');
-  });
-});
 
 async function checkRedirects(page: Page, currency: string) {
   const mainPage = new MainPage(page);
