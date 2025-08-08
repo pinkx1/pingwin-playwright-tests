@@ -1,0 +1,172 @@
+{
+  "USD": [
+    {
+      "method": "46",
+      "name": "Binance Pay",
+      "minAmount": 3,
+      "maxAmount": 5000,
+      "icon": "/assets/images/payment/binance.svg",
+      "fields": []
+    }
+  ],
+  "EUR": [
+    {
+      "method": "34",
+      "name": "Банковская карта (от €6)",
+      "minAmount": 6,
+      "maxAmount": 2500,
+      "icon": "/assets/images/payment/card4.svg",
+      "fields": [
+        "fullForm"
+      ]
+    },
+    {
+      "method": "46",
+      "name": "Binance Pay",
+      "minAmount": 3,
+      "maxAmount": 4295,
+      "icon": "/assets/images/payment/binance.svg",
+      "fields": []
+    },
+    {
+      "method": "52",
+      "name": "Банковская карта (от €10)",
+      "minAmount": 10,
+      "maxAmount": 1000,
+      "icon": "/assets/images/payment/card2.svg",
+      "fields": [
+        "fullForm"
+      ]
+    },
+    {
+      "method": "50",
+      "name": "Банковская карта (от €6)",
+      "minAmount": 6,
+      "maxAmount": 10000,
+      "icon": "/assets/images/payment/card3.svg",
+      "fields": [
+        "fullForm",
+        "cardForm"
+      ]
+    }
+  ],
+  "UAH": [
+    {
+      "method": "29",
+      "name": "ПриватБанк и оплата по QR",
+      "minAmount": 300,
+      "maxAmount": 20000,
+      "icon": "/assets/images/payment/privatBank.svg",
+      "fields": []
+    },
+    {
+      "method": "30",
+      "name": "Банковская карта (от 300₴, P2P)",
+      "minAmount": 300,
+      "maxAmount": 20000,
+      "icon": "/assets/images/payment/card2.svg",
+      "fields": []
+    },
+    {
+      "method": "46",
+      "name": "Binance Pay",
+      "minAmount": 125,
+      "maxAmount": 206678,
+      "icon": "/assets/images/payment/binance.svg",
+      "fields": []
+    },
+    {
+      "method": "39",
+      "name": "Банковская карта (от 500₴, P2P)",
+      "minAmount": 500,
+      "maxAmount": 50000,
+      "icon": "/assets/images/payment/card1.svg",
+      "fields": []
+    }
+  ],
+  "KZT": [
+    {
+      "method": "46",
+      "name": "Binance Pay",
+      "minAmount": 1621,
+      "maxAmount": 2700016,
+      "icon": "/assets/images/payment/binance.svg",
+      "fields": []
+    }
+  ],
+  "RON": [
+    {
+      "method": "33",
+      "name": "Банковская карта (от 30 RON)",
+      "minAmount": 30,
+      "maxAmount": 12500,
+      "icon": "/assets/images/payment/card4.svg",
+      "fields": [
+        "fullForm"
+      ]
+    },
+    {
+      "method": "46",
+      "name": "Binance Pay",
+      "minAmount": 14,
+      "maxAmount": 21772,
+      "icon": "/assets/images/payment/binance.svg",
+      "fields": []
+    },
+    {
+      "method": "52",
+      "name": "Банковская карта (от €10)",
+      "minAmount": 51,
+      "maxAmount": 5070,
+      "icon": "/assets/images/payment/card2.svg",
+      "fields": [
+        "fullForm"
+      ]
+    },
+    {
+      "method": "50",
+      "name": "Банковская карта (от €6)",
+      "minAmount": 31,
+      "maxAmount": 50695,
+      "icon": "/assets/images/payment/card3.svg",
+      "fields": [
+        "fullForm",
+        "cardForm"
+      ]
+    }
+  ],
+  "UZS": [
+    {
+      "method": "31",
+      "name": "Банковская карта UZS (P2P)",
+      "minAmount": 30000,
+      "maxAmount": 5700000,
+      "icon": "/assets/images/payment/card3.svg",
+      "fields": []
+    },
+    {
+      "method": "32",
+      "name": "Банковская карта UZS",
+      "minAmount": 5000,
+      "maxAmount": 660000000,
+      "icon": "/assets/images/payment/card2.svg",
+      "fields": []
+    },
+    {
+      "method": "46",
+      "name": "Binance Pay",
+      "minAmount": 37755,
+      "maxAmount": 62923621,
+      "icon": "/assets/images/payment/binance.svg",
+      "fields": []
+    },
+    {
+      "method": "38",
+      "name": "Банковская карта (UZS, P2P)",
+      "minAmount": 10000,
+      "maxAmount": 15000000,
+      "icon": "/assets/images/payment/card1.svg",
+      "fields": []
+    }
+  ]
+}

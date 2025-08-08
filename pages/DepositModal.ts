@@ -260,6 +260,45 @@ export class DepositModal {
       has: this.page.locator(`img[src*="${iconFile}"]`)
     }).first();
   }
+  // Подбирает корректную сумму и заполняет поле.
+  // Возвращает фактически введённое значение.
+  async setValidAmountWithinLimits(): Promise<number> {
+    const min = await this.getMinDeposit();
+    const max = await this.getMaxDeposit(); // может быть null
+    // пробуем понять шаг поля
+    const stepAttr = await this.amountInput.getAttribute('step');
+    let step = Number(stepAttr || '1');
+    if (!Number.isFinite(step) || step <= 0) step = 1;
+
+    const decimals = step >= 1 ? 0 : (String(step).split('.')[1]?.length ?? 2);
+
+    // стартуем с ближайшего к min кратного step
+    const start = Math.ceil(min / step) * step;
+
+    let candidate: number;
+    if (max && max > min) {
+      // возьмём число строго между min и max с запасом в один step
+      candidate = Math.min(max - step, start + step);
+      // если max - min < step, то используем min (крайний случай)
+      if (candidate < min) candidate = min;
+    } else {
+      // нет верхней границы — просто min + step
+      candidate = start + step;
+    }
+
+    const value = Number(candidate.toFixed(decimals));
+
+    // надёжно перезаписываем поле
+    await this.amountInput.click();
+    await this.amountInput.fill(''); // очистка на случай автоподстановки
+    await this.amountInput.type(String(value));
+    // подождём, пока UI активирует кнопку
+    await expect(this.depositButton, 'Ожидалось: кнопка активна при валидной сумме')
+      .toBeEnabled();
+
+    return value;
+  }
 
 }
+
 

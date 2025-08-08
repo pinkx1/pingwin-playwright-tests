@@ -2,10 +2,10 @@
   "cookies": [
     {
       "name": "__lc_cid",
-      "value": "2da721a1-b92a-4080-bb78-c05f6228edf2",
+      "value": "1c9a0041-830b-46e8-b06b-ee357ad412ab",
       "domain": ".accounts.livechatinc.com",
       "path": "/v2/customer/token",
-      "expires": 1789235883.829651,
+      "expires": 1789248233.62443,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None",
@@ -14,10 +14,10 @@
     },
     {
       "name": "__lc_cst",
-      "value": "4d0ffa60c8d2154f88e13e936c34782ecb325d43647c07cd6df47b94c18d96d085779697f47b0239ff34fe818a2068a7a1f853927468067c052461ee54bd",
+      "value": "0db9b6a3af3163977ba30870e28228654666811462690f9d0abd54a59b8db7e3c1f0b2099293c3944eef04bbe85fad67b50c09caf09ba308a7d06f76812f",
       "domain": ".accounts.livechatinc.com",
       "path": "/v2/customer/token",
-      "expires": 1789235883.829753,
+      "expires": 1789248233.624476,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None",
@@ -26,10 +26,10 @@
     },
     {
       "name": "__lc_cid",
-      "value": "2da721a1-b92a-4080-bb78-c05f6228edf2",
+      "value": "1c9a0041-830b-46e8-b06b-ee357ad412ab",
       "domain": ".accounts.livechatinc.com",
       "path": "/customer/token",
-      "expires": 1789235883.82978,
+      "expires": 1789248233.624491,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None",
@@ -38,10 +38,10 @@
     },
     {
       "name": "__lc_cst",
-      "value": "4d0ffa60c8d2154f88e13e936c34782ecb325d43647c07cd6df47b94c18d96d085779697f47b0239ff34fe818a2068a7a1f853927468067c052461ee54bd",
+      "value": "0db9b6a3af3163977ba30870e28228654666811462690f9d0abd54a59b8db7e3c1f0b2099293c3944eef04bbe85fad67b50c09caf09ba308a7d06f76812f",
       "domain": ".accounts.livechatinc.com",
       "path": "/customer/token",
-      "expires": 1789235883.8298,
+      "expires": 1789248233.624506,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None",
@@ -60,60 +60,80 @@
     },
     {
       "name": "CLID",
-      "value": "853dc1a071ac4d10be3369213ae44ccb.20250808.20260808",
+      "value": "8ff5654668e0450fbaf97fdbe4999d04.20250808.20260808",
       "domain": "www.clarity.ms",
       "path": "/",
-      "expires": 1786211881.911993,
+      "expires": 1786224231.966504,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "_ga",
-      "value": "GA1.1.1767524467.1754675882",
+      "value": "GA1.1.1045221105.1754688232",
       "domain": ".pingwincasino24.com",
       "path": "/",
-      "expires": 1789235882.251878,
+      "expires": 1789248231.974652,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "_clck",
-      "value": "ydgeh5%7C2%7Cfya%7C0%7C2046",
+      "value": "17yxodk%7C2%7Cfya%7C0%7C2046",
       "domain": ".pingwincasino24.com",
       "path": "/",
-      "expires": 1786211882,
+      "expires": 1786224232,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "__oauth_redirect_detector",
-      "value": "counter=1&t=1754675914&tag=574dc08d2372141ed31a521c3c58a5ed280a7513",
+      "value": "counter=1&t=1754688264&tag=9e605c331d1ab7d03309d12417462d91aef2f18e",
       "domain": "accounts.livechatinc.com",
       "path": "/",
-      "expires": 1754675913.829819,
+      "expires": 1754688263.624517,
       "httpOnly": true,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "_ga_0CHZ7SNDG1",
-      "value": "GS2.1.s1754675882$o1$g0$t1754675884$j58$l0$h78153701",
+      "value": "GS2.1.s1754688231$o1$g0$t1754688233$j58$l0$h1692735028",
       "domain": ".pingwincasino24.com",
       "path": "/",
-      "expires": 1789235884.011557,
+      "expires": 1789248233.906756,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "c_id_auth",
+      "value": "897114",
+      "domain": "pingwincasino24.com",
+      "path": "/",
+      "expires": 1789248234.330867,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "sessionId",
+      "value": "NCLGV253HLCFMUDLHTDGI4Y4OKUYOCTA",
+      "domain": "pingwincasino24.com",
+      "path": "/",
+      "expires": 1786224234,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "MUID",
-      "value": "036287E6FD2A6180124B91A4FC416059",
+      "value": "234963B4EC606AC5182D75F6ED0B6BA7",
       "domain": ".bing.com",
       "path": "/",
-      "expires": 1788371885.246908,
+      "expires": 1788384235.505012,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
@@ -123,17 +143,17 @@
       "value": "0",
       "domain": ".c.bing.com",
       "path": "/",
-      "expires": 1755280685.246987,
+      "expires": 1755293035.505066,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "SRM_B",
-      "value": "036287E6FD2A6180124B91A4FC416059",
+      "value": "234963B4EC606AC5182D75F6ED0B6BA7",
       "domain": ".c.bing.com",
       "path": "/",
-      "expires": 1788371885.247007,
+      "expires": 1788384235.505082,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
@@ -150,10 +170,10 @@
     },
     {
       "name": "MUID",
-      "value": "036287E6FD2A6180124B91A4FC416059",
+      "value": "234963B4EC606AC5182D75F6ED0B6BA7",
       "domain": ".clarity.ms",
       "path": "/",
-      "expires": 1788371885.327527,
+      "expires": 1788384234.589076,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
@@ -163,7 +183,7 @@
       "value": "0",
       "domain": ".c.clarity.ms",
       "path": "/",
-      "expires": 1755280685.327561,
+      "expires": 1755293034.589096,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
@@ -173,47 +193,27 @@
       "value": "0",
       "domain": ".c.clarity.ms",
       "path": "/",
-      "expires": 1754676485.327569,
+      "expires": 1754688834.589106,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
-    },
-    {
-      "name": "c_id_auth",
-      "value": "897114",
-      "domain": "pingwincasino24.com",
-      "path": "/",
-      "expires": 1789235884.455905,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "sessionId",
-      "value": "NCLDVLMSOMN3RHGGX7EGAQUL2LJNFIIB",
-      "domain": "pingwincasino24.com",
-      "path": "/",
-      "expires": 1786211884,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
     },
     {
       "name": "currentUrl",
       "value": "%2Fru%2Fprofile",
       "domain": "pingwincasino24.com",
       "path": "/",
-      "expires": 1754762285.217064,
+      "expires": 1754774635.059217,
       "httpOnly": true,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "_clsk",
-      "value": "1e5gr4v%7C1754675885176%7C3%7C1%7Cl.clarity.ms%2Fcollect",
+      "value": "1jjh6wi%7C1754688234949%7C3%7C1%7Cl.clarity.ms%2Fcollect",
       "domain": ".pingwincasino24.com",
       "path": "/",
-      "expires": 1754762285,
+      "expires": 1754774634,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
@@ -229,7 +229,7 @@
         },
         {
           "name": "confirmDataPrompts",
-          "value": "[{\"userId\":897114,\"state\":{\"viewCount\":1,\"lastPopupTime\":null,\"showPopup\":false,\"showBanner\":false,\"sessionToken\":\"NCLDVLMSOMN3RHGGX7EGAQUL2LJNFIIB\"}}]"
+          "value": "[{\"userId\":897114,\"state\":{\"viewCount\":1,\"lastPopupTime\":null,\"showPopup\":false,\"showBanner\":false,\"sessionToken\":\"NCLGV253HLCFMUDLHTDGI4Y4OKUYOCTA\"}}]"
         }
       ]
     },
@@ -238,11 +238,11 @@
       "localStorage": [
         {
           "name": "@@lc_auth_token:9a2759ec-9527-460d-af16-b46e685c49e3",
-          "value": "{\"accessToken\":\"us-south1:J86FfvEkRa6JhyxQ1WPS0A\",\"entityId\":\"2da721a1-b92a-4080-bb78-c05f6228edf2\",\"expiresIn\":14400000,\"tokenType\":\"Bearer\",\"creationDate\":1754675883851,\"organizationId\":\"9a2759ec-9527-460d-af16-b46e685c49e3\"}"
+          "value": "{\"accessToken\":\"us-south1:nu1arzqZQk-qYcZpp07Asg\",\"entityId\":\"1c9a0041-830b-46e8-b06b-ee357ad412ab\",\"expiresIn\":14400000,\"tokenType\":\"Bearer\",\"creationDate\":1754688233625,\"organizationId\":\"9a2759ec-9527-460d-af16-b46e685c49e3\"}"
         },
         {
           "name": "9a2759ec-9527-460d-af16-b46e685c49e3:state",
-          "value": "{\"messageDraft\":{\"value\":null,\"expires\":1754677684102},\"clientLimitExceededLifted\":{\"value\":true,\"expires\":1754677684102},\"eyeCatcherHidden\":{\"value\":false,\"expires\":1754677684102},\"invitationHiddenIds\":{\"value\":[],\"expires\":1754677684102},\"invitationDisplayedIds\":{\"value\":[],\"expires\":1754677684102},\"maximized\":{\"value\":false,\"expires\":1754677684102},\"visibility\":{\"value\":{\"state\":\"minimized\"},\"expires\":1754677684102},\"muted\":{\"value\":false,\"expires\":1754677684102},\"limitReached\":{\"value\":false,\"expires\":1754677684102},\"greetingsMuted\":{\"value\":false,\"expires\":1754677684102},\"wasActivated\":{\"value\":false,\"expires\":1754677684102},\"currentView\":{\"expires\":1754677684102},\"locationHistory\":{\"value\":{\"history\":[],\"updatedAt\":1754675883482},\"expires\":1754677684102},\"recommendations\":{\"value\":{\"id\":\"\",\"products\":[],\"hiddenIds\":[]},\"expires\":1754677684102},\"pendingOpenAIRunId\":{\"value\":null,\"expires\":1754677684102},\"contactInvitation\":{\"value\":{\"hidden\":false,\"hasSeen\":false},\"expires\":1754677684102},\"chatBotGreeting\":{\"value\":{\"hidden\":false,\"hasSeen\":false},\"expires\":1754677684102},\"postponedGreeting\":{\"value\":null,\"expires\":1754677684102},\"pipConsent\":{\"value\":null,\"expires\":1754677684102}}"
+          "value": "{\"messageDraft\":{\"value\":null,\"expires\":1754690033990},\"clientLimitExceededLifted\":{\"value\":true,\"expires\":1754690033990},\"eyeCatcherHidden\":{\"value\":false,\"expires\":1754690033990},\"invitationHiddenIds\":{\"value\":[],\"expires\":1754690033990},\"invitationDisplayedIds\":{\"value\":[],\"expires\":1754690033990},\"maximized\":{\"value\":false,\"expires\":1754690033990},\"visibility\":{\"value\":{\"state\":\"minimized\"},\"expires\":1754690033990},\"muted\":{\"value\":false,\"expires\":1754690033990},\"limitReached\":{\"value\":false,\"expires\":1754690033990},\"greetingsMuted\":{\"value\":false,\"expires\":1754690033990},\"wasActivated\":{\"value\":false,\"expires\":1754690033990},\"currentView\":{\"expires\":1754690033990},\"locationHistory\":{\"value\":{\"history\":[],\"updatedAt\":1754688233393},\"expires\":1754690033990},\"recommendations\":{\"value\":{\"id\":\"\",\"products\":[],\"hiddenIds\":[]},\"expires\":1754690033990},\"pendingOpenAIRunId\":{\"value\":null,\"expires\":1754690033990},\"contactInvitation\":{\"value\":{\"hidden\":false,\"hasSeen\":false},\"expires\":1754690033990},\"chatBotGreeting\":{\"value\":{\"hidden\":false,\"hasSeen\":false},\"expires\":1754690033990},\"postponedGreeting\":{\"value\":null,\"expires\":1754690033990},\"pipConsent\":{\"value\":null,\"expires\":1754690033990}}"
         },
         {
           "name": "_livechat_has_visited",
