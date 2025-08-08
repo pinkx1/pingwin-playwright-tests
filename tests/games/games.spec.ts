@@ -157,7 +157,6 @@ for (const game of launchGames) {
     ]);
 
     const iframe = page.locator('iframe.game-iframe');
-    await page.pause(); // Даем время на загрузку iframe
 
     try {
       await expect(iframe).toBeVisible({ timeout: 15000 });
