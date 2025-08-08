@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/fixtures';
+import { test, expect } from '../../fixtures/users/basicUser.fixture';
 
 // Все тесты в этом файле используют authenticatedPage,
 // поэтому логин выполняется один раз в beforeAll фикстуры.

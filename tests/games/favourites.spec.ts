@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/fixtures';
+import { test, expect } from '../../fixtures/users/basicUser.fixture';
 
 test('add and remove game from favourites', async ({ authenticatedPage: page }) => {
   // ensure favourites empty

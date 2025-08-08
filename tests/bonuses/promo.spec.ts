@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/fixtures';
+import { test, expect } from '../../fixtures/users/basicUser.fixture';
 
 test('страница промокодов открывается', async ({ authenticatedPage: page }) => {
   await page.goto('/promocodes');

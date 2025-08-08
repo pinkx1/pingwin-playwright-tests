@@ -110,7 +110,6 @@ export class WithdrawalModal {
     await this.amountInput.fill(valueStr);
   }
 
-
   async expectInvalidAmount(value: number) {
     await this.setAmount(value);
     const actualColor = await this.amountInput.evaluate(el => getComputedStyle(el).color);
