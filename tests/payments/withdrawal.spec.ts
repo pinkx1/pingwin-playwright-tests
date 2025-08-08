@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/withdrawalFixtures';
+import { test, expect } from '../../fixtures/users/withdrawalFixtures';
 import { MainPage } from '../../pages/MainPage';
 import { WithdrawalModal, WithdrawalMethod } from '../../pages/WithdrawalModal';
 
