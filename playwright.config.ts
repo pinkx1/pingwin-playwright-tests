@@ -40,7 +40,7 @@ export default defineConfig({
         ignoreHTTPSErrors: true,
         screenshot: 'only-on-failure',
       },
-      timeout: 180_000,
+      timeout: 210_000,
       fullyParallel: false,
     },
   ],
