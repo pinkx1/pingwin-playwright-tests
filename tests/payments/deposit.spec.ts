@@ -1,4 +1,5 @@
 import { test, expect } from '../../fixtures/users/basicUser.fixture';
+import type { Page, Response } from '@playwright/test';
 import { MainPage } from '../../pages/MainPage';
 import { DepositModal, DepositMethod } from '../../pages/DepositModal';
 
@@ -58,6 +59,111 @@ async function checkMethods(modal: DepositModal, methods: DepositMethod[]) {
     await modal.goBack();
     await modal.waitForPaymentMethods();
   }
+}
+
+
+test.describe('Deposit redirects to payment systems', () => {
+  test('USD methods redirect correctly', async ({ authenticatedPage }) => {
+    await checkRedirectsForCurrency(authenticatedPage, 'USD');
+  });
+
+  test('EUR methods redirect correctly', async ({ authenticatedPage }) => {
+    await checkRedirectsForCurrency(authenticatedPage, 'EUR');
+  });
+
+  test('UAH methods redirect correctly', async ({ authenticatedPage }) => {
+    await checkRedirectsForCurrency(authenticatedPage, 'UAH');
+  });
+
+  test('KZT methods redirect correctly', async ({ authenticatedPage }) => {
+    await checkRedirectsForCurrency(authenticatedPage, 'KZT');
+  });
+
+  test('RON methods redirect correctly', async ({ authenticatedPage }) => {
+    await checkRedirectsForCurrency(authenticatedPage, 'RON');
+  });
+
+  test('UZS methods redirect correctly', async ({ authenticatedPage }) => {
+    await checkRedirectsForCurrency(authenticatedPage, 'UZS');
+  });
+});
+
+async function checkRedirectsForCurrency(page: Page, currency: string) {
+  const mainPage = new MainPage(page);
+  await mainPage.open();
+  await mainPage.openDepositModal();
+  const modal = new DepositModal(page);
+  const methods = await modal.selectCurrencyAndGetMethods(currency);
+  for (const method of methods) {
+    await handleMethod(page, mainPage, modal, currency, method);
+  }
+}
+
+async function handleMethod(
+  page: Page,
+  mainPage: MainPage,
+  modal: DepositModal,
+  currency: string,
+  method: DepositMethod
+) {
+  const amount = Math.min(
+    method.minAmount + 1,
+    method.maxAmount ? method.maxAmount - 1 : method.minAmount + 1
+  );
+  await modal.openPaymentMethod(method.name);
+  await modal.setAmount(amount);
+
+  let response: Response;
+  if (method.fields?.includes('fullForm')) {
+    await modal.depositButton.click();
+    await fillFullForm(page);
+    if (method.fields.some((f) => f === 'holderCardForm' || f === 'cardForm')) {
+      await fillHolderCardForm(page);
+    }
+    response = await page.waitForNavigation({ waitUntil: 'load', timeout: 15000 });
+  } else if (method.fields?.some((f) => f === 'holderCardForm' || f === 'cardForm')) {
+    await modal.depositButton.click();
+    await fillHolderCardForm(page);
+    response = await page.waitForNavigation({ waitUntil: 'load', timeout: 15000 });
+  } else {
+    [response] = await Promise.all([
+      page.waitForNavigation({ waitUntil: 'load', timeout: 15000 }),
+      modal.depositButton.click(),
+    ]);
+  }
+
+  expect(response.status()).toBe(200);
+  expect(response.url()).not.toContain('pingwincasino24.com');
+
+  await mainPage.open();
+  await mainPage.openDepositModal();
+  await modal.selectCurrency(currency);
+}
+
+async function fillFullForm(page: Page) {
+  await page.locator('input[name="fname"]').fill('John');
+  await page.locator('input[name="lname"]').fill('Doe');
+  const selects = page.locator('select');
+  if (await selects.count()) {
+    await selects.nth(0).selectOption({ index: 0 });
+    await selects.nth(1).selectOption({ index: 0 });
+    await selects.nth(2).selectOption({ index: 0 });
+  }
+  await page.locator('input[name="city"]').fill('City');
+  await page.locator('input[name="street"]').fill('Street');
+  await page.locator('input[name="zip"]').fill('123456');
+  await page.locator('input[name="email"]').fill('user@example.com');
+  await page.locator('input[name="phone"]').fill('1234567890');
+  await page.getByRole('button', { name: 'Pay' }).click();
+}
+
+async function fillHolderCardForm(page: Page) {
+  await page.locator('input[name="card"]').fill('4111111111111111');
+  await page.locator('input[name="expireMonth"]').fill('12');
+  await page.locator('input[name="expireYear"]').fill('30');
+  await page.locator('input[name="cvv"]').fill('123');
+  await page.locator('input[name="holder"]').fill('JOHN DOE');
+  await page.getByRole('button', { name: 'Pay' }).click();
 }
 
 

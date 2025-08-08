@@ -6,6 +6,7 @@ export interface DepositMethod {
   minAmount: number;
   maxAmount: number;
   icon: string;
+  fields?: string[];
 }
 
 export class DepositModal {
@@ -68,6 +69,7 @@ export class DepositModal {
       minAmount: m.minAmount,
       maxAmount: m.maxAmount,
       icon: m.icon,
+      fields: m.fields,
     }));
 
   }
