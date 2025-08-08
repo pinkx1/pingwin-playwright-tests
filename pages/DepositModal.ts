@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator, expect, Response } from '@playwright/test';
 
 export interface DepositMethod {
   method: string;
@@ -6,6 +6,7 @@ export interface DepositMethod {
   minAmount: number;
   maxAmount: number;
   icon: string;
+  fields?: string[];
 }
 
 export class DepositModal {
@@ -68,6 +69,7 @@ export class DepositModal {
       minAmount: m.minAmount,
       maxAmount: m.maxAmount,
       icon: m.icon,
+      fields: m.fields || [],
     }));
 
   }
@@ -179,6 +181,38 @@ export class DepositModal {
       const aboveMax = max > 1 ? max + 1 : max * 2;
       await this.expectInvalidAmount(aboveMax);
     }
+  }
+
+  async fillAndSubmitAdditionalForm(data: Record<string, string>): Promise<Response | null> {
+    const form = this.dialog.locator('form').last();
+    await form.waitFor();
+    const inputs = form.locator('input');
+    const inputCount = await inputs.count();
+    for (let i = 0; i < inputCount; i++) {
+      const input = inputs.nth(i);
+      const type = (await input.getAttribute('type')) || '';
+      if (type === 'checkbox' || type === 'radio') {
+        continue;
+      }
+      const name = (await input.getAttribute('name')) || '';
+      const value = data[name] || data['default'] || '';
+      await input.fill(value);
+    }
+    const selects = form.locator('select');
+    const selectCount = await selects.count();
+    for (let i = 0; i < selectCount; i++) {
+      const select = selects.nth(i);
+      const options = await select.locator('option').all();
+      if (options.length) {
+        const optionValue = await options[Math.min(1, options.length - 1)].getAttribute('value');
+        await select.selectOption(optionValue || undefined);
+      }
+    }
+    const [response] = await Promise.all([
+      this.page.waitForNavigation({ waitUntil: 'load' }).catch(() => null),
+      form.locator('button[type="submit"], button:has-text("Pay")').first().click(),
+    ]);
+    return response;
   }
 
   private parseAmount(text: string): number {
