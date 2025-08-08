@@ -1,4 +1,4 @@
-import { expect, test } from '../../fixtures/fixtures';
+import { test, expect } from '../../fixtures/users/basicUser.fixture';
 import { MainPage } from '../../pages/MainPage';
 import { DepositModal, DepositMethod } from '../../pages/DepositModal';
 

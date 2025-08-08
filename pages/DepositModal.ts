@@ -8,8 +8,6 @@ export interface DepositMethod {
   icon: string;
 }
 
-
-
 export class DepositModal {
   readonly page: Page;
   readonly dialog: Locator;
