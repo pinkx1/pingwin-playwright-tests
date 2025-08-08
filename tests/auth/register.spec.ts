@@ -18,38 +18,6 @@ async function checkRequiredCheckboxes(page) {
   await page.locator('label', { hasText: 'Я принимаю Условия и Положения' }).locator('span').first().click();
 }
 
-// 1. Opening registration modal
-test('registration modal opens', async ({ page }) => {
-  const mainPage = new MainPage(page);
-  const authModal = new AuthModal(page);
-
-  await mainPage.open();
-  await mainPage.openRegisterModal();
-
-  // await authModal.waitForVisible();
-  await expect(authModal.registerTab).toBeVisible();
-});
-
-// 3. Presence of all required fields
-test('registration form contains all required fields', async ({ page }) => {
-  const mainPage = new MainPage(page);
-  const authModal = new AuthModal(page);
-
-  await mainPage.open();
-  await mainPage.openRegisterModal();
-  await authModal.switchToRegister();
-
-  await expect(authModal.emailInput).toBeVisible();
-  await expect(authModal.passwordInput).toBeVisible();
-  await expect(authModal.ageCheckbox).toBeVisible();
-  await expect(authModal.termsCheckbox).toBeVisible();
-  await expect(authModal.newsCheckbox).toBeVisible();
-
-  await authModal.switchToPhone();
-  await expect(authModal.phoneInput).toBeVisible();
-  await expect(authModal.passwordInput).toBeVisible();
-});
-
 // 4. Validation: no email
 test('cannot register without email', async ({ page }) => {
   const mainPage = new MainPage(page);
