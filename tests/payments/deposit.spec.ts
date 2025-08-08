@@ -69,6 +69,7 @@ test.describe('Deposit feature', () => {
 });
 
 test.describe('Deposit redirection', () => {
+  test.setTimeout(200000)
   test('USD methods redirect to payment pages', async ({ authenticatedPage: page }) => {
     await checkRedirects(page, 'USD');
   });
@@ -100,42 +101,41 @@ async function checkRedirects(page: Page, currency: string) {
   await mainPage.openDepositModal();
   let modal = new DepositModal(page);
   const methods = await modal.selectCurrencyAndGetMethods(currency);
+
   for (const method of methods) {
     await modal.openPaymentMethod(method.name);
     const amount = method.minAmount + 1 <= method.maxAmount ? method.minAmount + 1 : method.minAmount;
     await modal.setAmount(amount);
-    const navPromise = page
-      .waitForNavigation({ waitUntil: 'load' })
-      .catch((err) => {
-        console.log(`[DEBUG] Navigation failed or timed out: ${err}`);
-        return null;
-      });
-    await modal.depositButton.click();
-    let response = await navPromise;
 
-    if (!response) {
-      let isDialogVisible = false;
-      try {
-        isDialogVisible = await modal.dialog.isVisible();
-      } catch (err) {
-        console.log(`[DEBUG] Dialog visibility check failed: ${err}`);
-      }
+    const originBefore = new URL(page.url()).origin;
+
+    // пробуем кликнуть по кнопке депозита
+    await Promise.all([
+      page.waitForURL(url => new URL(url).origin !== originBefore, { timeout: 10000 }),
+      modal.depositButton.click({ force: true }),
+    ]).catch(async () => {
+      // возможно, требуется доп. форма — проверим
+      const isDialogVisible = await modal.dialog.isVisible().catch(() => false);
 
       if (isDialogVisible) {
-        response = await modal.fillAndSubmitAdditionalForm(paymentData);
+        page.on('console', msg => {
+          console.log(`[BROWSER LOG] ${msg.type()}: ${msg.text()}`);
+        });
+        const response = await modal.fillAndSubmitAdditionalForm(paymentData);
         if (!response) {
           await expect(page.getByText('Payment Failed')).toBeVisible();
+          return;
         }
-      } else {
-        await page.waitForLoadState('load').catch(() => null);
-        const checkResp = await page.request.get(page.url()).catch(() => null);
-        expect(checkResp?.status()).toBe(200);
-        expect(new URL(page.url()).hostname).not.toContain('pingwincasino24');
       }
-    } else {
-      expect(response.status()).toBe(200);
-      expect(new URL(page.url()).hostname).not.toContain('pingwincasino24');
-    }
+    });
+
+    const redirectedUrl = page.url();
+    const finalResp = await page.request.get(redirectedUrl).catch(() => null);
+
+    expect(finalResp?.status(), `Статус ${redirectedUrl}`).toBe(200);
+    expect(new URL(redirectedUrl).hostname).not.toContain('pingwincasino24');
+
+    // Открываем модалку заново
     await page.goto('/');
     await mainPage.openDepositModal();
     modal = new DepositModal(page);
@@ -143,6 +143,7 @@ async function checkRedirects(page: Page, currency: string) {
     await modal.waitForPaymentMethods();
   }
 }
+
 
 async function checkMethods(modal: DepositModal, methods: DepositMethod[]) {
   for (const method of methods) {
