@@ -205,12 +205,16 @@ export class DepositModal {
       const options = await select.locator('option').all();
       if (options.length) {
         const optionValue = await options[Math.min(1, options.length - 1)].getAttribute('value');
-        await select.selectOption(optionValue || undefined);
+        if (optionValue) {
+          await select.selectOption(optionValue);
+        }
       }
     }
+    const submit = form.locator('button[type="submit"], button:has-text("Pay")').first();
+    await expect(submit).toBeEnabled();
     const [response] = await Promise.all([
       this.page.waitForNavigation({ waitUntil: 'load' }).catch(() => null),
-      form.locator('button[type="submit"], button:has-text("Pay")').first().click(),
+      submit.click(),
     ]);
     return response;
   }
