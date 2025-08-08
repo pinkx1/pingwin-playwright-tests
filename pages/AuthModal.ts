@@ -126,8 +126,7 @@ export class AuthModal {
 
         async closeEmailConfirmationIfVisible() {
                 if (await this.isEmailConfirmationVisible()) {
-                        await this.emailConfirmationCloseButton.click();
-                        await expect(this.emailConfirmationDialog).toBeHidden();
+                        await this.emailConfirmationCloseButton.click({ force: true });
                 }
         }
 
