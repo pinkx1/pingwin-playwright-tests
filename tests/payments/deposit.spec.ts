@@ -1,5 +1,5 @@
 import { test, expect } from '../../fixtures/users/basicUser.fixture';
-import type { Page, Response } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { MainPage } from '../../pages/MainPage';
 import { DepositModal, DepositMethod } from '../../pages/DepositModal';
 
@@ -113,27 +113,37 @@ async function handleMethod(
   await modal.openPaymentMethod(method.name);
   await modal.setAmount(amount);
 
-  let response: Response;
   if (method.fields?.includes('fullForm')) {
     await modal.depositButton.click();
     await fillFullForm(page);
     if (method.fields.some((f) => f === 'holderCardForm' || f === 'cardForm')) {
       await fillHolderCardForm(page);
     }
-    response = await page.waitForNavigation({ waitUntil: 'load', timeout: 15000 });
+    await page.waitForURL((url) => !url.includes('pingwincasino24.com'), {
+      waitUntil: 'load',
+      timeout: 15000,
+    });
   } else if (method.fields?.some((f) => f === 'holderCardForm' || f === 'cardForm')) {
     await modal.depositButton.click();
     await fillHolderCardForm(page);
-    response = await page.waitForNavigation({ waitUntil: 'load', timeout: 15000 });
+    await page.waitForURL((url) => !url.includes('pingwincasino24.com'), {
+      waitUntil: 'load',
+      timeout: 15000,
+    });
   } else {
-    [response] = await Promise.all([
-      page.waitForNavigation({ waitUntil: 'load', timeout: 15000 }),
+    await Promise.all([
+      page.waitForURL((url) => !url.includes('pingwincasino24.com'), {
+        waitUntil: 'load',
+        timeout: 15000,
+      }),
       modal.depositButton.click(),
     ]);
   }
 
+  const finalUrl = page.url();
+  const response = await page.request.get(finalUrl);
   expect(response.status()).toBe(200);
-  expect(response.url()).not.toContain('pingwincasino24.com');
+  expect(finalUrl).not.toContain('pingwincasino24.com');
 
   await mainPage.open();
   await mainPage.openDepositModal();
@@ -143,6 +153,12 @@ async function handleMethod(
 async function fillFullForm(page: Page) {
   await page.locator('input[name="fname"]').fill('John');
   await page.locator('input[name="lname"]').fill('Doe');
+  const countryControl = page.locator('.select-countries .select__control');
+  if (await countryControl.count()) {
+    await countryControl.click();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+  }
   const selects = page.locator('select');
   if (await selects.count()) {
     await selects.nth(0).selectOption({ index: 0 });
@@ -154,7 +170,7 @@ async function fillFullForm(page: Page) {
   await page.locator('input[name="zip"]').fill('123456');
   await page.locator('input[name="email"]').fill('user@example.com');
   await page.locator('input[name="phone"]').fill('1234567890');
-  await page.getByRole('button', { name: 'Pay' }).click();
+  await page.locator('button[type="submit"]').click();
 }
 
 async function fillHolderCardForm(page: Page) {
@@ -163,7 +179,7 @@ async function fillHolderCardForm(page: Page) {
   await page.locator('input[name="expireYear"]').fill('30');
   await page.locator('input[name="cvv"]').fill('123');
   await page.locator('input[name="holder"]').fill('JOHN DOE');
-  await page.getByRole('button', { name: 'Pay' }).click();
+  await page.locator('button[type="submit"]').click();
 }
 
 
