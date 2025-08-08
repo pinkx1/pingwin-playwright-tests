@@ -119,20 +119,20 @@ async function handleMethod(
     if (method.fields.some((f) => f === 'holderCardForm' || f === 'cardForm')) {
       await fillHolderCardForm(page);
     }
-    await page.waitForURL((url) => !url.includes('pingwincasino24.com'), {
+    await page.waitForURL((url) => !url.href.includes('pingwincasino24.com'), {
       waitUntil: 'load',
       timeout: 15000,
     });
   } else if (method.fields?.some((f) => f === 'holderCardForm' || f === 'cardForm')) {
     await modal.depositButton.click();
     await fillHolderCardForm(page);
-    await page.waitForURL((url) => !url.includes('pingwincasino24.com'), {
+    await page.waitForURL((url) => !url.href.includes('pingwincasino24.com'), {
       waitUntil: 'load',
       timeout: 15000,
     });
   } else {
     await Promise.all([
-      page.waitForURL((url) => !url.includes('pingwincasino24.com'), {
+      page.waitForURL((url) => !url.href.includes('pingwincasino24.com'), {
         waitUntil: 'load',
         timeout: 15000,
       }),
