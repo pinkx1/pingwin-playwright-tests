@@ -10,14 +10,25 @@ const nonExistingEmail = `no_user_${Math.random().toString(36).slice(2, 8)}@exam
 
 // 1. Успешный вход по почте с переходом в профиль
 test('user can login with email and access profile', async ({ page }) => {
+
   const mainPage = new MainPage(page);
   const authModal = new AuthModal(page);
 
   await mainPage.open();
   await mainPage.openLoginModal();
   await authModal.login(validUser.email, validUser.password);
+  // Попытка найти хотя бы одно уведомление (без падения, если не нашлось)
+  const toastList = page.locator('ol.sc-afd14a6a-1.fJlNeS > li');
+  const isToastVisible = await toastList.first().isVisible().catch(() => false);
+
+  // Если есть хотя бы одно — ждём, пока все исчезнут
+  if (isToastVisible) {
+    await expect(toastList).toHaveCount(0, { timeout: 5000 });
+  }
+
 
   await page.getByRole('link', { name: /avatar/i }).click({ force: true });
+  await page.waitForLoadState('load');
   const emailInput = page.getByPlaceholder('Ваша почта');
   await expect(emailInput).toHaveValue(validUser.email);
 });
@@ -30,8 +41,11 @@ test('user can login with phone and access profile', async ({ page }) => {
   await mainPage.open();
   await mainPage.openLoginModal();
   await authModal.loginByPhone(existingPhoneUser.phone, existingPhoneUser.password);
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForSelector('a[href="/ru/profile"]');
 
   await page.getByRole('link', { name: /avatar/i }).click({ force: true });
+  await page.waitForLoadState('load');
   const phoneInput = page.locator('#phone-input input[name="phone"]');
   await expect(phoneInput).toHaveValue(existingPhoneUser.phone);
 });

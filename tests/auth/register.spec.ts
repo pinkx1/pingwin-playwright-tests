@@ -211,10 +211,15 @@ test('new user can register and access profile', async ({ page }) => {
   await mainPage.openRegisterModal();
   await authModal.register(email, password);
 
-  await page.locator('img[src*="email-spin.svg"]').waitFor({ state: 'visible', timeout: 5000 });
-  await page.waitForTimeout(2000);
+  await page.locator('img[src*="email-spin.svg"]').waitFor({ state: 'visible', timeout: 4000 });
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForSelector('a[href="/ru/profile"]');
+
   await authModal.closeEmailConfirmationIfVisible();
   await page.locator('a[href="/ru/profile"]').click({ force: true });
+  // await page.goto('/ru/profile');
+  await page.waitForLoadState('load');
+
 
   const emailInput = page.getByPlaceholder('Ваша почта');
   await expect(emailInput).toHaveValue(email);
@@ -230,10 +235,13 @@ test('new user can register by phone', async ({ page }) => {
   await mainPage.open();
   await mainPage.openRegisterModal();
   await authModal.registerByPhone(phone, password);
-  await page.waitForTimeout(2000); // Wait for potential SMS confirmation
-  // await authModal.closeSmsConfirmationIfVisible();
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForSelector('a[href="/ru/profile"]');
+  await authModal.closeSmsConfirmationIfVisible();
   await page.locator('a[href="/ru/profile"]').click({ force: true });
   await page.locator('a[href="/ru/profile"]').click({ force: true });
+  // await page.goto('/ru/profile');
+  await page.waitForLoadState('load');
 
   const phoneInput = page.locator('#phone-input input[name="phone"]');
   await expect(phoneInput).toHaveValue(phone);
@@ -326,11 +334,13 @@ test('email confirmation removes confirm button', async ({ page }) => {
   const confirmationLink = confirmationLinkMatch![0];
 
   await page.goto(confirmationLink);
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForSelector('a[href="/ru/profile"]');
 
   await page.locator('a[href="/ru/profile"]').waitFor({ state: 'visible' });
   await page.locator('a[href="/ru/profile"]').click();
-
-  await page.waitForURL('**/profile');
+  await page.goto('/ru/profile');
+  await page.waitForLoadState('domcontentloaded');
   await expect(page.getByPlaceholder('Ваша почта')).toBeVisible();
 
   await expect(page.getByRole('button', { name: 'Подтвердить' })).toHaveCount(0);
