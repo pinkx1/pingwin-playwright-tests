@@ -88,8 +88,9 @@ export class DepositModal {
     return this.methodsContainer.locator('> div').filter({ hasText: search });
   }
 
-  async openPaymentMethod(name: string) {
-    await this.methodsContainer.locator(`text="${name}"`).first().click();
+  async openPaymentMethod(method: DepositMethod) {
+    const row = this.getPaymentMethodRow(method);
+    await row.click();
     await this.dialog.getByText('Назад').waitFor();
   }
 
