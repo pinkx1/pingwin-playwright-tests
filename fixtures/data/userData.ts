@@ -1,14 +1,14 @@
 export const validUser = {
-        email: 'kotmanul00@gmail.com',
-        password: '123qweQWE!'
+        email: process.env.VALID_USER_EMAIL!,
+        password: process.env.VALID_USER_PASSWORD!,
 };
 
 export const existingPhoneUser = {
-        phone: '(33)211-39-99',
-        password: '123qweQWE!'
+        phone: process.env.EXISTING_PHONE_USER_PHONE!,
+        password: process.env.EXISTING_PHONE_USER_PASSWORD!,
 };
 
 export const withdrawalUser = {
-        email: 'yomig48540@nicext.com',
-        password: '8LSMR@yprHfJaNn'
+        email: process.env.WITHDRAWAL_USER_EMAIL!,
+        password: process.env.WITHDRAWAL_USER_PASSWORD!,
 };

@@ -14,8 +14,6 @@ export default defineConfig({
   workers: process.env.CI ? 1 : 4,
   reporter: 'html',
 
-  // ❌ УБРАН глобальный use — он создавал "безымянный" проект
-
   projects: [
     {
       name: 'chromium',
