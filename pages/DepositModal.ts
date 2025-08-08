@@ -210,11 +210,14 @@ export class DepositModal {
         }
       }
     }
-    const submit = form.locator('button[type="submit"], button:has-text("Pay")').first();
+    const submit = form
+      .locator('button[type="submit"], button:has-text("Pay"), button:has-text("Оплатить")')
+      .first();
+    await submit.waitFor({ state: 'visible' });
     await expect(submit).toBeEnabled();
     const [response] = await Promise.all([
       this.page.waitForNavigation({ waitUntil: 'load' }).catch(() => null),
-      submit.click(),
+      submit.click({ force: true, noWaitAfter: true }),
     ]);
     return response;
   }
