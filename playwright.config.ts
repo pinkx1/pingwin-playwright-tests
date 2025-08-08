@@ -30,21 +30,20 @@ export default defineConfig({
         screenshot: 'only-on-failure',
       },
     },
-    // Если понадобится включить webkit:
-    // {
-    //   name: 'webkit',
-    //   use: {
-    //     ...devices['Desktop Safari'],
-    //     viewport: { width: 1400, height: 800 },
-    //     baseURL: 'https://pingwincasino24.com',
-    //     locale: 'ru',
-    //     trace: 'on-first-retry',
-    //     headless: false,
-    //     ignoreHTTPSErrors: true,
-    //     screenshot: 'only-on-failure',
-    //   },
-    //   timeout: 180_000,
-    //   fullyParallel: false,
-    // },
+    {
+      name: 'webkit',
+      use: {
+        ...devices['Desktop Safari'],
+        viewport: { width: 1400, height: 800 },
+        baseURL: 'https://pingwincasino24.com',
+        locale: 'ru',
+        trace: 'on-first-retry',
+        headless: true,
+        ignoreHTTPSErrors: true,
+        screenshot: 'only-on-failure',
+      },
+      timeout: 180_000,
+      fullyParallel: false,
+    },
   ],
 });
