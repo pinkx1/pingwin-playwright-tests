@@ -12,6 +12,8 @@ test('игра добавляется в избранное и отобража�
   await card.scrollIntoViewIfNeeded();
   await card.hover();
   await card.click();
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('load');
   await page.waitForTimeout(1000);
 
   const heartEmpty = page.locator('img[src*="heart-unfilled"]');
@@ -33,7 +35,7 @@ test('удаление игры из избранного очищает спи�
 
   await favCard.scrollIntoViewIfNeeded();
   await favCard.hover();
-
+  
   const favHeartFilled = favCard.locator('img[src*="heart-filled"]');
   await favHeartFilled.waitFor({ state: 'visible' });
   await favHeartFilled.click();
